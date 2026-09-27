@@ -1,1 +1,211 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hướng Dẫn Cài Đặt Ứng Dụng</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --bg-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #4b5563;
+            --border-color: #e5e7eb;
+        }
 
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            margin: 0;
+            padding: 15px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.25rem;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .os-section {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px dashed var(--border-color);
+        }
+        
+        .os-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .os-title {
+            font-size: 1.15rem;
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .browser-box {
+            background: #f9fafb;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .browser-title {
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            color: #111827;
+        }
+
+        .browser-icon {
+            width: 24px;
+            height: 24px;
+        }
+
+        ol {
+            margin: 0;
+            padding-left: 20px;
+            color: var(--text-muted);
+        }
+
+        ol li {
+            margin-bottom: 10px;
+        }
+
+        .highlight {
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .link-box {
+            background: #eef2ff;
+            border: 1px solid #c7d2fe;
+            padding: 10px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            word-break: break-all;
+            color: var(--primary-color);
+            margin: 10px 0;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 0.85rem;
+            color: #6b7280;
+            padding: 10px;
+            margin-top: 10px;
+        }
+        
+        .footer p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>HƯỚNG DẪN THÊM APP RA MÀN HÌNH CHÍNH</h1>
+        </div>
+
+        <div class="content">
+            <!-- Hướng dẫn cho iPhone (iOS) -->
+            <div class="os-section">
+                <h2 class="os-title">📲 Dành cho iPhone (iOS)</h2>
+                
+                <!-- Safari -->
+                <div class="browser-box">
+                    <div class="browser-title">
+                        <!-- Icon Safari -->
+                        <svg class="browser-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="#007AFF" stroke-width="2"/><path d="M14.5 9.5L10.5 10.5L9.5 14.5L13.5 13.5L14.5 9.5Z" stroke="#007AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="1" fill="#FF3B30"/></svg>
+                        Dùng trình duyệt Safari (Khuyên dùng)
+                    </div>
+                    <ol>
+                        <li>Mở <b>Safari</b> và truy cập vào đường link App:
+                            <div class="link-box">https://script.google.com/macros/s/AKfycbw1vWv3ajHmL141PHMk5VwH7ZdBWTR1tslcUZ4dq9NmOA6EVMa6NFjap86Oi2MZIJ6RVw/exec</div>
+                        </li>
+                        <li>Ở thanh công cụ mép dưới màn hình, bấm vào biểu tượng <span class="highlight">Chia sẻ</span> (Hình vuông có mũi tên chỉ lên ⬆️).</li>
+                        <li>Vuốt menu xuống, chọn <span class="highlight">Thêm vào Màn hình chính</span> (Add to Home Screen).</li>
+                        <li>Bấm <span class="highlight">Thêm</span> (Add) ở góc trên bên phải.</li>
+                    </ol>
+                </div>
+
+                <!-- Chrome trên iOS -->
+                <div class="browser-box">
+                    <div class="browser-title">
+                        <!-- Icon Chrome -->
+                        <svg class="browser-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="#EA4335" stroke-width="2"/><circle cx="12" cy="12" r="4" stroke="#4285F4" stroke-width="2"/><path d="M12 8L18.9 4M12 16L8.5 22M8.5 10L2 13" stroke="#34A853" stroke-width="2" stroke-linecap="round"/></svg>
+                        Dùng trình duyệt Chrome
+                    </div>
+                    <ol>
+                        <li>Mở <b>Chrome</b> và truy cập vào link App ở trên.</li>
+                        <li>Nhấn vào biểu tượng <span class="highlight">Chia sẻ</span> (hình mũi tên cong) ở góc trên bên phải thanh địa chỉ.</li>
+                        <li>Kéo xuống và chọn <span class="highlight">Thêm vào Màn hình chính</span>.</li>
+                        <li>Làm theo hướng dẫn trên màn hình để thêm.</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Hướng dẫn cho Android -->
+            <div class="os-section">
+                <h2 class="os-title">🤖 Dành cho Android</h2>
+                
+                <div class="browser-box">
+                    <div class="browser-title">
+                        <!-- Icon Chrome -->
+                        <svg class="browser-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="#EA4335" stroke-width="2"/><circle cx="12" cy="12" r="4" stroke="#4285F4" stroke-width="2"/><path d="M12 8L18.9 4M12 16L8.5 22M8.5 10L2 13" stroke="#34A853" stroke-width="2" stroke-linecap="round"/></svg>
+                        Dùng trình duyệt Google Chrome
+                    </div>
+                    <ol>
+                        <li>Mở <b>Chrome</b> và truy cập vào đường link App:
+                            <div class="link-box">https://script.google.com/macros/s/AKfycbw1vWv3ajHmL141PHMk5VwH7ZdBWTR1tslcUZ4dq9NmOA6EVMa6NFjap86Oi2MZIJ6RVw/exec</div>
+                        </li>
+                        <li>Bấm vào <span class="highlight">dấu 3 chấm ⋮</span> ở góc trên bên phải màn hình.</li>
+                        <li>Chọn <span class="highlight">Thêm vào Màn hình chính</span> (Add to Home screen) hoặc <i>Cài đặt ứng dụng</i>.</li>
+                        <li>Bấm <span class="highlight">Thêm</span> (Add) để xác nhận hoàn tất.</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer bản quyền -->
+    <div class="footer">
+        <p>© 2026 Do Nguyen | 20260927-1896</p>
+        <p>Email: vongcosay@gmail.com | Web: donguyen.net</p>
+    </div>
+
+</body>
+</html>
