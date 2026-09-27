@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hướng Dẫn Cài Đặt Ứng Dụng</title>
+    <title>Hướng Dẫn Thêm App Ra Màn Hình Chính</title>
     <style>
         :root {
             --primary-color: #2563eb;
@@ -20,15 +20,21 @@
             color: var(--text-main);
             line-height: 1.6;
             margin: 0;
-            padding: 15px;
+            padding: 20px;
+            /* Căn giữa trang web cho giao diện máy tính */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
         }
 
         .container {
-            max-width: 600px;
-            margin: 0 auto;
+            width: 100%;
+            max-width: 700px; /* Giới hạn độ rộng tối đa trên máy tính */
             background: var(--card-bg);
             border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); /* Đổ bóng đẹp hơn trên PC */
             overflow: hidden;
             margin-bottom: 20px;
         }
@@ -36,22 +42,22 @@
         .header {
             background-color: var(--primary-color);
             color: white;
-            padding: 20px;
+            padding: 25px 20px;
             text-align: center;
         }
 
         .header h1 {
             margin: 0;
-            font-size: 1.25rem;
+            font-size: 1.5rem;
         }
 
         .content {
-            padding: 20px;
+            padding: 30px;
         }
 
         .os-section {
-            margin-bottom: 25px;
-            padding-bottom: 20px;
+            margin-bottom: 30px;
+            padding-bottom: 25px;
             border-bottom: 1px dashed var(--border-color);
         }
         
@@ -62,35 +68,43 @@
         }
 
         .os-title {
-            font-size: 1.15rem;
+            font-size: 1.25rem;
             color: var(--primary-color);
             margin-top: 0;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
 
         .browser-box {
             background: #f9fafb;
             border: 1px solid var(--border-color);
             border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
         }
         
+        /* Hiệu ứng hover nhẹ trên máy tính */
+        .browser-box:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border-color: #d1d5db;
+        }
+
         .browser-title {
             font-weight: bold;
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             color: #111827;
+            font-size: 1.1rem;
         }
 
         .browser-icon {
-            width: 24px;
-            height: 24px;
+            width: 28px;
+            height: 28px;
         }
 
         ol {
@@ -100,7 +114,7 @@
         }
 
         ol li {
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
 
         .highlight {
@@ -111,10 +125,10 @@
         .link-box {
             background: #eef2ff;
             border: 1px solid #c7d2fe;
-            padding: 10px;
+            padding: 12px;
             border-radius: 6px;
             font-family: monospace;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             word-break: break-all;
             color: var(--primary-color);
             margin: 10px 0;
@@ -122,14 +136,28 @@
 
         .footer {
             text-align: center;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             color: #6b7280;
             padding: 10px;
-            margin-top: 10px;
+            width: 100%;
+            max-width: 700px;
         }
         
         .footer p {
             margin: 5px 0;
+        }
+
+        /* Tương thích màn hình điện thoại nhỏ */
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            .content {
+                padding: 20px;
+            }
+            .header h1 {
+                font-size: 1.25rem;
+            }
         }
     </style>
 </head>
@@ -143,7 +171,7 @@
         <div class="content">
             <!-- Hướng dẫn cho iPhone (iOS) -->
             <div class="os-section">
-                <h2 class="os-title">📲 Dành cho iPhone (iOS)</h2>
+                <h2 class="os-title">📲 Dành cho điện thoại iPhone (iOS)</h2>
                 
                 <!-- Safari -->
                 <div class="browser-box">
@@ -153,8 +181,8 @@
                         Dùng trình duyệt Safari (Khuyên dùng)
                     </div>
                     <ol>
-                        <li>Mở <b>Safari</b> và truy cập vào đường link App:
-                            <div class="link-box">https://script.google.com/macros/s/AKfycbw1vWv3ajHmL141PHMk5VwH7ZdBWTR1tslcUZ4dq9NmOA6EVMa6NFjap86Oi2MZIJ6RVw/exec</div>
+                        <li>Mở <b>Safari</b> và truy cập vào đường link App (Ví dụ):
+                            <div class="link-box">https://script.google.com/macros/s/AKfycbw1v.../exec</div>
                         </li>
                         <li>Ở thanh công cụ mép dưới màn hình, bấm vào biểu tượng <span class="highlight">Chia sẻ</span> (Hình vuông có mũi tên chỉ lên ⬆️).</li>
                         <li>Vuốt menu xuống, chọn <span class="highlight">Thêm vào Màn hình chính</span> (Add to Home Screen).</li>
@@ -170,7 +198,7 @@
                         Dùng trình duyệt Chrome
                     </div>
                     <ol>
-                        <li>Mở <b>Chrome</b> và truy cập vào link App ở trên.</li>
+                        <li>Mở <b>Chrome</b> và truy cập vào đường link App.</li>
                         <li>Nhấn vào biểu tượng <span class="highlight">Chia sẻ</span> (hình mũi tên cong) ở góc trên bên phải thanh địa chỉ.</li>
                         <li>Kéo xuống và chọn <span class="highlight">Thêm vào Màn hình chính</span>.</li>
                         <li>Làm theo hướng dẫn trên màn hình để thêm.</li>
@@ -180,7 +208,7 @@
 
             <!-- Hướng dẫn cho Android -->
             <div class="os-section">
-                <h2 class="os-title">🤖 Dành cho Android</h2>
+                <h2 class="os-title">🤖 Dành cho điện thoại Android</h2>
                 
                 <div class="browser-box">
                     <div class="browser-title">
@@ -189,8 +217,8 @@
                         Dùng trình duyệt Google Chrome
                     </div>
                     <ol>
-                        <li>Mở <b>Chrome</b> và truy cập vào đường link App:
-                            <div class="link-box">https://script.google.com/macros/s/AKfycbw1vWv3ajHmL141PHMk5VwH7ZdBWTR1tslcUZ4dq9NmOA6EVMa6NFjap86Oi2MZIJ6RVw/exec</div>
+                        <li>Mở <b>Chrome</b> và truy cập vào đường link App (Ví dụ):
+                            <div class="link-box">https://script.google.com/macros/s/AKfycbw1v.../exec</div>
                         </li>
                         <li>Bấm vào <span class="highlight">dấu 3 chấm ⋮</span> ở góc trên bên phải màn hình.</li>
                         <li>Chọn <span class="highlight">Thêm vào Màn hình chính</span> (Add to Home screen) hoặc <i>Cài đặt ứng dụng</i>.</li>
