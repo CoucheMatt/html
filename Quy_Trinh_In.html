@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quy Trình Sản Xuất Thẻ Tag Quần Áo - Kế Hoạch In Offset</title>
+    <!-- Tích hợp Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Định nghĩa biến màu sắc hiện đại */
+        :root {
+            --primary: #2563eb;       /* Xanh dương đậm */
+            --primary-dark: #1e40af;
+            --accent: #f59e0b;        /* Vàng cam tạo điểm nhấn */
+            --bg-body: #f1f5f9;       /* Xám nhạt */
+            --bg-card: #ffffff;
+            --text-main: #334155;
+            --text-muted: #64748b;
+            --note-bg: #eff6ff;
+            --note-border: #3b82f6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- HEADER / HERO SECTION --- */
+        .hero {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #ffffff;
+            padding: 80px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border-bottom: 5px solid var(--primary);
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50px; left: -50px;
+            width: 200px; height: 200px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -50px; right: 10%;
+            width: 300px; height: 300px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .hero-subtitle {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #94a3b8;
+            margin-bottom: 15px;
+            display: block;
+            font-weight: 600;
+        }
+
+        .hero-title {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 800;
+            margin-bottom: 20px;
+            line-height: 1.2;
+            z-index: 1;
+            position: relative;
+        }
+
+        .hero-title span {
+            color: var(--primary);
+            background: -webkit-linear-gradient(45deg, #60a5fa, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* --- CONTAINER & INTRO --- */
+        .container {
+            max-width: 1200px;
+            margin: -40px auto 40px;
+            padding: 0 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .intro-box {
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin-bottom: 60px;
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            border-top: 4px solid var(--accent);
+        }
+
+        .intro-box strong {
+            color: var(--text-main);
+            font-size: 1.2rem;
+        }
+
+        /* --- PROCESS GRID --- */
+        .process-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 40px;
+        }
+
+        /* Responsive Breakpoints */
+        @media (min-width: 768px) {
+            .process-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .process-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        /* --- CARD STYLING --- */
+        .step-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .step-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Image Wrapper & Number Badge */
+        .card-img-wrapper {
+            position: relative;
+            width: 100%;
+            height: 240px;
+            background-color: #e2e8f0;
+        }
+
+        .card-img-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .step-card:hover .card-img-wrapper img {
+            transform: scale(1.05);
+        }
+
+        .step-number {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 45px;
+            height: 45px;
+            background: var(--primary);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            font-weight: 800;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.4);
+            z-index: 2;
+        }
+
+        /* Card Content */
+        .card-content {
+            padding: 30px 25px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .step-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 15px;
+        }
+
+        .card-content ul {
+            list-style: none;
+            margin-bottom: 25px;
+            flex-grow: 1;
+        }
+
+        .card-content ul li {
+            position: relative;
+            padding-left: 24px;
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
+
+        .card-content ul li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            top: 0;
+            color: var(--primary);
+            font-weight: 800;
+            font-size: 0.9rem;
+        }
+
+        /* Planner Note / Highlight Box */
+        .planner-note {
+            background-color: var(--note-bg);
+            border-left: 4px solid var(--note-border);
+            padding: 15px 20px;
+            border-radius: 0 10px 10px 0;
+            font-size: 0.9rem;
+            color: #1e3a8a;
+            margin-top: auto; /* Đẩy xuống đáy card */
+        }
+
+        .planner-note-title {
+            display: block;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 5px;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* --- FOOTER --- */
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            margin-top: 40px;
+            background-color: #ffffff;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        /* Hiệu ứng mượt mà khi load ảnh lỗi */
+        .error-img-svg {
+            width: 100%; height: 100%; 
+            display: flex; align-items: center; justify-content: center;
+            background: #e2e8f0; color: #94a3b8; font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HERO SECTION -->
+    <header class="hero">
+        <span class="hero-subtitle">Tài Liệu Đào Tạo Nội Bộ</span>
+        <h1 class="hero-title">Quy Trình Sản Xuất <span>Thẻ Tag</span></h1>
+        <p style="color: #cbd5e1; font-size: 1.1rem; max-width: 600px; margin: 0 auto;">
+            Sổ tay hướng dẫn chi tiết dành riêng cho vị trí Nhân viên Kế hoạch In Offset.
+        </p>
+    </header>
+
+    <main class="container">
+        <!-- INTRO -->
+        <div class="intro-box">
+            <p><strong>Mục tiêu:</strong> Giúp Kế hoạch viên nắm bắt toàn bộ vòng đời sản xuất của một sản phẩm thẻ tag quần áo (Hang tag). Từ đó đưa ra quyết định tính toán vật tư, sắp xếp lịch chạy máy và theo dõi tiến độ một cách <em>tối ưu và tiết kiệm chi phí nhất</em>.</p>
+        </div>
+
+        <!-- PROCESS GRID -->
+        <div class="process-grid">
+            
+            <!-- BƯỚC 1 -->
+            <article class="step-card">
+                <div class="card-img-wrapper">
+                    <div class="step-number">1</div>
+                    <img src="https://raw.githubusercontent.com/vongcosay/html/refs/heads/main/hinh_tiep_nhan_thiet_ke.jpg" 
+                         alt="Tiếp nhận và Thiết kế"
+                         onerror="this.outerHTML='<div class=\'error-img-svg\'>[ Ảnh Thiết Kế / Bình Bản ]</div>'">
+                </div>
+                <div class="card-content">
+                    <h2 class="step-title">Kiểm tra File & Bình Bản</h2>
+                    <ul>
+                        <li>Phòng Thiết kế kiểm tra file gốc từ khách hàng (hệ màu CMYK, tràn lề bleed).</li>
+                        <li>Dàn trang (bình bản) lên khổ giấy in thực tế.</li>
+                    </ul>
+                    <div class="planner-note">
+                        <span class="planner-note-title">🎯 Góc nhìn Kế Hoạch</span>
+                        Quyết định ghép bài hay chạy bài riêng. Chọn khổ giấy in (VD: 65x86cm, 79x109cm) sao cho lợi giấy nhất, được nhiều con tag nhất để giảm chi phí kẽm và giấy.
+                    </div>
+                </div>
+            </article>
+
+            <!-- BƯỚC 2 -->
+            <article class="step-card">
+                <div class="card-img-wrapper">
+                    <div class="step-number">2</div>
+                    <img src="https://raw.githubusercontent.com/vongcosay/html/refs/heads/main/hinh_xuat_kem.jpg" 
+                         alt="Xuất kẽm"
+                         onerror="this.outerHTML='<div class=\'error-img-svg\'>[ Ảnh Xuất Kẽm CTP ]</div>'">
+                </div>
+                <div class="card-content">
+                    <h2 class="step-title">Xuất Kẽm CTP (Chế Bản)</h2>
+                    <ul>
+                        <li>Chuyển dữ liệu đã bình bản qua máy ghi kẽm (Computer to Plate - CTP).</li>
+                        <li>In 4 kẽm tương ứng 4 màu C, M, Y, K (hoặc thêm kẽm màu pha Pantone).</li>
+                    </ul>
+                    <div class="planner-note">
+                        <span class="planner-note-title">🎯 Góc nhìn Kế Hoạch</span>
+                        Đảm bảo lịch xuất kẽm khớp với lịch máy in. Tránh tình trạng thợ in chờ kẽm gây lãng phí thời gian máy chạy.
+                    </div>
+                </div>
+            </article>
+
+            <!-- BƯỚC 3 -->
+            <article class="step-card">
+                <div class="card-img-wrapper">
+                    <div class="step-number">3</div>
+                    <img src="https://raw.githubusercontent.com/vongcosay/html/refs/heads/main/hinh_vat_tu_giay.jpg" 
+                         alt="Chuẩn bị vật tư"
+                         onerror="this.outerHTML='<div class=\'error-img-svg\'>[ Ảnh Kho Giấy / Cắt Giấy ]</div>'">
+                </div>
+                <div class="card-content">
+                    <h2 class="step-title">Xuất Vật Tư (Giấy, Mực)</h2>
+                    <ul>
+                        <li>Cắt giấy từ cuộn hoặc xả từ ram lớn về đúng khổ in đã bình bản.</li>
+                        <li>Chất liệu phổ biến: Couche, Bristol, Kraft hoặc Ivory (định lượng 250gsm - 350gsm).</li>
+                    </ul>
+                    <div class="planner-note">
+                        <span class="planner-note-title">🎯 Góc nhìn Kế Hoạch</span>
+                        Tính toán số tờ in chính thức + số lượng giấy bù hao (cho việc canh bài, hao hụt lúc bế, cán màng). Ra lệnh xuất kho giấy kịp thời.
+                    </div>
+                </div>
+            </article>
+
+            <!-- BƯỚC 4 -->
+            <article class="step-card">
+                <div class="card-img-wrapper">
+                    <div class="step-number">4</div>
+                    <img src="https://raw.githubusercontent.com/vongcosay/html/refs/heads/main/hinh_in_offset.jpg" 
+                         alt="In Offset"
+                         onerror="this.outerHTML='<div class=\'error-img-svg\'>[ Ảnh Máy In Offset ]</div>'">
+                </div>
+                <div class="card-content">
+                    <h2 class="step-title">Sản Xuất In Offset</h2>
+                    <ul>
+                        <li>Lắp kẽm lên máy in offset.</li>
+                        <li>Chạy thử (canh bài) để chỉnh chồng màu, canh sắc độ màu khớp với mẫu (Proof).</li>
+                        <li>Chạy sản lượng hàng loạt.</li>
+                    </ul>
+                    <div class="planner-note">
+                        <span class="planner-note-title">🎯 Góc nhìn Kế Hoạch</span>
+                        Lên lịch sản xuất cho từng ca. Nhóm các đơn hàng cùng định lượng giấy, cùng khổ in chạy nối tiếp nhau để giảm thời gian rửa máy, thay giấy.
+                    </div>
+                </div>
+            </article>
+
+            <!-- BƯỚC 5 -->
+            <article class="step-card">
+                <div class="card-img-wrapper">
+                    <div class="step-number">5</div>
+                    <img src="https://raw.githubusercontent.com/vongcosay/html/refs/heads/main/hinh_gia_cong.jpg" 
+                         alt="Gia công sau in"
+                         onerror="this.outerHTML='<div class=\'error-img-svg\'>[ Ảnh Máy Bế / Cán Màng ]</div>'">
+                </div>
+                <div class="card-content">
+                    <h2 class="step-title">Gia Công Sau In</h2>
+                    <ul>
+                        <li><strong>Cán màng:</strong> Mờ hoặc bóng để bảo vệ mực, tăng độ cứng.</li>
+                        <li><strong>Hiệu ứng:</strong> Ép kim logo, Phủ UV, Bế nổi...</li>
+                        <li><strong>Bế hình & Đục lỗ:</strong> Cắt rời từng thẻ tag theo khuôn và đục lỗ xỏ dây.</li>
+                    </ul>
+                    <div class="planner-note">
+                        <span class="planner-note-title">🎯 Góc nhìn Kế Hoạch</span>
+                        Phân bổ thời gian hợp lý vì in xong cần chờ mực khô mới đi cán màng. Theo dõi xưởng gia công để không trễ tiến độ.
+                    </div>
+                </div>
+            </article>
+
+            <!-- BƯỚC 6 -->
+            <article class="step-card">
+                <div class="card-img-wrapper">
+                    <div class="step-number">6</div>
+                    <img src="https://raw.githubusercontent.com/vongcosay/html/refs/heads/main/hinh_kcs_dong_goi.jpg" 
+                         alt="KCS và Đóng gói"
+                         onerror="this.outerHTML='<div class=\'error-img-svg\'>[ Ảnh KCS / Đóng Thùng ]</div>'">
+                </div>
+                <div class="card-content">
+                    <h2 class="step-title">KCS & Đóng Gói</h2>
+                    <ul>
+                        <li>Xỏ dây tag (nếu khách yêu cầu).</li>
+                        <li>Kiểm tra chất lượng (loại bỏ hàng lỗi: lem mực, bế lệch, sai màu).</li>
+                        <li>Cột dây thun theo bó, đóng thùng carton.</li>
+                    </ul>
+                    <div class="planner-note">
+                        <span class="planner-note-title">🎯 Góc nhìn Kế Hoạch</span>
+                        Chốt số lượng thành phẩm thực tế so với đơn hàng để thông báo xuất hóa đơn và xếp lịch xe giao hàng.
+                    </div>
+                </div>
+            </article>
+
+        </div>
+    </main>
+
+    <footer>
+        &copy; 2026 Do Nguyen | 20261002-2351
+    </footer>
+
+</body>
+</html>
