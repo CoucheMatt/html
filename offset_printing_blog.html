@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nhật Ký Sự Cố In Offset | Do Nguyen</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            900: '#0c4a6e',
+                        }
+                    },
+                    boxShadow: {
+                        'soft': '0 10px 40px -10px rgba(0,0,0,0.05)',
+                        'soft-hover': '0 20px 50px -10px rgba(0,0,0,0.1)',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body { background-color: #f8fafc; }
+        
+        /* Smooth scrolling */
+        html { scroll-behavior: smooth; }
+        
+        /* Image hover zoom effect */
+        .img-zoom-container { overflow: hidden; }
+        .img-zoom-container img {
+            transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .post-card:hover .img-zoom-container img {
+            transform: scale(1.08);
+        }
+
+        /* Tag transition */
+        .post-card {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        /* Hide scrollbar for horizontal scrolling */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    </style>
+</head>
+<body class="text-slate-800 font-sans antialiased flex flex-col min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-white/80 backdrop-blur-xl sticky top-0 z-50 border-b border-slate-200/50 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center shadow-lg shadow-brand-500/30">
+                    <i class="fas fa-layer-group text-white text-sm"></i>
+                </div>
+                <span class="font-bold text-lg tracking-tight text-slate-900">Offset<span class="text-brand-600">Logs</span></span>
+            </div>
+            <div class="text-sm font-semibold text-slate-500 hidden sm:block">
+                Hệ thống lưu trữ sự cố In Ấn
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="flex-grow max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex flex-col gap-8">
+        
+        <!-- Profile & Intro -->
+        <section class="bg-white rounded-3xl p-6 sm:p-8 shadow-soft border border-slate-100 flex flex-col sm:flex-row items-center gap-6">
+            <div class="relative flex-shrink-0">
+                <div class="absolute inset-0 bg-brand-500 rounded-full blur-lg opacity-20 translate-y-2"></div>
+                <img src="https://avatars.githubusercontent.com/u/171990589?s=400&u=c29e9ad5163049dcd02604fbff2a8efefc86bd3c&v=4" 
+                     alt="Do Nguyen" 
+                     class="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-white shadow-md object-cover">
+            </div>
+            <div class="text-center sm:text-left">
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Do Nguyen</h1>
+                <div class="mt-2 inline-flex items-center gap-2 px-3 py-1 bg-brand-50 text-brand-600 text-xs font-bold uppercase tracking-wider rounded-full">
+                    <i class="fas fa-tools"></i> Prepress Engineer
+                </div>
+                <p class="mt-4 text-slate-600 leading-relaxed max-w-2xl text-sm sm:text-base">
+                    Đây là không gian lưu trữ và chia sẻ các sự cố thực tế trong quá trình chế bản và in offset. 
+                    Mục tiêu là ghi nhận nguyên nhân và giải pháp để tránh lặp lại sai lầm, từ file thiết kế cho đến khi ra thành phẩm.
+                </p>
+            </div>
+        </section>
+
+        <!-- Filter Tags -->
+        <section class="sticky top-20 z-40 bg-[#f8fafc]/90 backdrop-blur-md py-4 -mx-4 px-4 sm:mx-0 sm:px-0">
+            <div class="flex flex-wrap items-center justify-center gap-2 pb-2 sm:pb-0" id="filter-container">
+                <button class="filter-btn active flex-shrink-0 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all bg-brand-600 text-white shadow-md shadow-brand-500/30" data-filter="all">
+                    Tất cả sự cố
+                </button>
+                <button class="filter-btn flex-shrink-0 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 hover:text-brand-600" data-filter="file-thiet-ke">
+                    🎨 File thiết kế
+                </button>
+                <button class="filter-btn flex-shrink-0 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 hover:text-brand-600" data-filter="che-ban">
+                    💻 Chế bản
+                </button>
+                <button class="filter-btn flex-shrink-0 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 hover:text-brand-600" data-filter="xuat-film">
+                    🎞️ Xuất film
+                </button>
+                <button class="filter-btn flex-shrink-0 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 hover:text-brand-600" data-filter="ra-kem">
+                    🖨️ Ra kẽm
+                </button>
+                <button class="filter-btn flex-shrink-0 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 hover:text-brand-600" data-filter="truoc-khi-in">
+                    🔍 Trước khi in
+                </button>
+                <button class="filter-btn flex-shrink-0 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 hover:text-brand-600" data-filter="in-offset">
+                    ⚙️ In ấn
+                </button>
+                <button class="filter-btn flex-shrink-0 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 hover:text-brand-600" data-filter="sau-khi-in">
+                    📦 Thành phẩm
+                </button>
+            </div>
+        </section>
+
+        <!-- Posts Feed -->
+        <main class="space-y-6" id="posts-container">
+            
+            <!-- Post 1 -->
+            <article class="post-card bg-white rounded-3xl p-4 sm:p-6 shadow-soft hover:shadow-soft-hover border border-slate-100 transition-all duration-300 flex flex-col md:flex-row gap-6" data-tags="file-thiet-ke,che-ban">
+                <!-- Square Thumbnail -->
+                <div class="img-zoom-container relative w-full md:w-64 lg:w-[320px] flex-shrink-0 aspect-square rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&q=80&w=800&h=800" 
+                         alt="Design Error" 
+                         class="w-full h-full object-cover">
+                    <!-- Post Date -->
+                    <div class="absolute top-3 left-3">
+                        <span class="px-3 py-1.5 bg-white/90 backdrop-blur-md text-slate-800 text-xs font-bold rounded-lg shadow-sm">
+                            16 Thg 10, 2026
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- Content Area -->
+                <div class="flex flex-col flex-grow">
+                    <!-- Tags -->
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="px-2.5 py-1 bg-rose-100 text-rose-700 text-xs font-bold rounded-md">File thiết kế</span>
+                        <span class="px-2.5 py-1 bg-cyan-100 text-cyan-700 text-xs font-bold rounded-md">Chế bản</span>
+                    </div>
+
+                    <h2 class="text-xl md:text-2xl font-bold text-slate-900 mb-6 leading-snug">
+                        Lỗi rớt font và mất link ảnh khi chuyển file gốc (.ai, .indd) sang nhà in
+                    </h2>
+
+                    <!-- 4 Main Datapoints Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-grow content-start">
+                        <!-- Sự cố -->
+                        <div class="sm:col-span-2 bg-rose-50/50 rounded-xl p-4 border border-rose-100">
+                            <h3 class="text-xs font-bold text-rose-800 mb-1.5 uppercase tracking-wide">
+                                <i class="fas fa-triangle-exclamation mr-1"></i> Sự cố
+                            </h3>
+                            <p class="text-slate-700 text-sm">Hệ thống báo thiếu font chữ, hình ảnh bị vỡ nét (low res). Bản in test xuất ra bị thay thế font mặc định làm hỏng bố cục.</p>
+                        </div>
+
+                        <!-- Nguyên nhân -->
+                        <div class="sm:col-span-2 bg-amber-50/50 rounded-xl p-4 border border-amber-100">
+                            <h3 class="text-xs font-bold text-amber-800 mb-1.5 uppercase tracking-wide">
+                                <i class="fas fa-bug mr-1"></i> Nguyên nhân
+                            </h3>
+                            <p class="text-slate-700 text-sm">Designer gửi file AI nhưng không <strong>Package</strong> hoặc <strong>Create Outlines</strong>. Hình ảnh dạng link chứ không được Embed.</p>
+                        </div>
+
+                        <!-- Nguồn gốc -->
+                        <div class="bg-blue-50/50 rounded-xl p-4 border border-blue-100">
+                            <h3 class="text-xs font-bold text-blue-800 mb-1.5 uppercase tracking-wide">
+                                <i class="fas fa-folder-open mr-1"></i> Nguồn gốc file
+                            </h3>
+                            <p class="text-slate-700 text-sm font-medium">Khách hàng Freelancer gửi qua Zalo (File AI 2024).</p>
+                        </div>
+
+                        <!-- Ghi nhận bởi -->
+                        <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                            <h3 class="text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">
+                                <i class="fas fa-user-edit mr-1"></i> Ghi nhận bởi
+                            </h3>
+                            <p class="text-slate-700 text-sm font-medium">Đồng nghiệp (Team Prepress)</p>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Post 2 -->
+            <article class="post-card bg-white rounded-3xl p-4 sm:p-6 shadow-soft hover:shadow-soft-hover border border-slate-100 transition-all duration-300 flex flex-col md:flex-row gap-6" data-tags="ra-kem,in-offset">
+                <!-- Square Thumbnail -->
+                <div class="img-zoom-container relative w-full md:w-64 lg:w-[320px] flex-shrink-0 aspect-square rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&q=80&w=800&h=800" 
+                         alt="CTP Offset" 
+                         class="w-full h-full object-cover">
+                    <!-- Post Date -->
+                    <div class="absolute top-3 left-3">
+                        <span class="px-3 py-1.5 bg-white/90 backdrop-blur-md text-slate-800 text-xs font-bold rounded-lg shadow-sm">
+                            12 Thg 10, 2026
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- Content Area -->
+                <div class="flex flex-col flex-grow">
+                    <!-- Tags -->
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="px-2.5 py-1 bg-orange-100 text-orange-700 text-xs font-bold rounded-md">Kẽm (CTP)</span>
+                        <span class="px-2.5 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold rounded-md">In offset</span>
+                    </div>
+
+                    <h2 class="text-xl md:text-2xl font-bold text-slate-900 mb-6 leading-snug">
+                        Hiện tượng Moiré (nổi hoa văn) trên dải màu Gradient xám
+                    </h2>
+
+                    <!-- 4 Main Datapoints Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-grow content-start">
+                        <!-- Sự cố -->
+                        <div class="sm:col-span-2 bg-rose-50/50 rounded-xl p-4 border border-rose-100">
+                            <h3 class="text-xs font-bold text-rose-800 mb-1.5 uppercase tracking-wide">
+                                <i class="fas fa-triangle-exclamation mr-1"></i> Sự cố
+                            </h3>
+                            <p class="text-slate-700 text-sm">Bản in xuất hiện các mảng hoa văn lạ (giao thoa gợn sóng lưới tram) trên vùng chuyển màu xám pha từ 4 màu CMYK gây mất thẩm mỹ.</p>
+                        </div>
+
+                        <!-- Nguyên nhân -->
+                        <div class="sm:col-span-2 bg-amber-50/50 rounded-xl p-4 border border-amber-100">
+                            <h3 class="text-xs font-bold text-amber-800 mb-1.5 uppercase tracking-wide">
+                                <i class="fas fa-bug mr-1"></i> Nguyên nhân
+                            </h3>
+                            <p class="text-slate-700 text-sm">Thiết lập góc xoay tram (Screen Angles) trong phần mềm RIP không chuẩn xác. K và M bị set góc chênh lệch dưới 30 độ.</p>
+                        </div>
+
+                        <!-- Nguồn gốc -->
+                        <div class="bg-blue-50/50 rounded-xl p-4 border border-blue-100">
+                            <h3 class="text-xs font-bold text-blue-800 mb-1.5 uppercase tracking-wide">
+                                <i class="fas fa-folder-open mr-1"></i> Nguồn gốc file
+                            </h3>
+                            <p class="text-slate-700 text-sm font-medium">Hệ thống RIP xuất kẽm nội bộ (PDF đã qua bình bản).</p>
+                        </div>
+
+                        <!-- Ghi nhận bởi -->
+                        <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                            <h3 class="text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">
+                                <i class="fas fa-user-edit mr-1"></i> Ghi nhận bởi
+                            </h3>
+                            <p class="text-slate-700 text-sm font-medium">Do Nguyen (Cá nhân)</p>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Post 3 -->
+            <article class="post-card bg-white rounded-3xl p-4 sm:p-6 shadow-soft hover:shadow-soft-hover border border-slate-100 transition-all duration-300 flex flex-col md:flex-row gap-6" data-tags="xuat-film,in-offset">
+                <!-- Square Thumbnail -->
+                <div class="img-zoom-container relative w-full md:w-64 lg:w-[320px] flex-shrink-0 aspect-square rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800&h=800" 
+                         alt="Film Output" 
+                         class="w-full h-full object-cover grayscale">
+                    <!-- Post Date -->
+                    <div class="absolute top-3 left-3">
+                        <span class="px-3 py-1.5 bg-white/90 backdrop-blur-md text-slate-800 text-xs font-bold rounded-lg shadow-sm">
+                            05 Thg 10, 2026
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- Content Area -->
+                <div class="flex flex-col flex-grow">
+                    <!-- Tags -->
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="px-2.5 py-1 bg-purple-100 text-purple-700 text-xs font-bold rounded-md">Xuất film</span>
+                        <span class="px-2.5 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold rounded-md">In offset</span>
+                    </div>
+
+                    <h2 class="text-xl md:text-2xl font-bold text-slate-900 mb-6 leading-snug">
+                        Lệch tay kê, chồng màu không khớp do màng film bị dãn
+                    </h2>
+
+                    <!-- 4 Main Datapoints Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-grow content-start">
+                        <!-- Sự cố -->
+                        <div class="sm:col-span-2 bg-rose-50/50 rounded-xl p-4 border border-rose-100">
+                            <h3 class="text-xs font-bold text-rose-800 mb-1.5 uppercase tracking-wide">
+                                <i class="fas fa-triangle-exclamation mr-1"></i> Sự cố
+                            </h3>
+                            <p class="text-slate-700 text-sm">Thợ in không thể chồng khớp 4 màu CMYK (bị bóng chữ, lệch viền). Bốn tấm kẽm phơi ra có kích thước không hoàn toàn đồng nhất.</p>
+                        </div>
+
+                        <!-- Nguyên nhân -->
+                        <div class="sm:col-span-2 bg-amber-50/50 rounded-xl p-4 border border-amber-100">
+                            <h3 class="text-xs font-bold text-amber-800 mb-1.5 uppercase tracking-wide">
+                                <i class="fas fa-bug mr-1"></i> Nguyên nhân
+                            </h3>
+                            <p class="text-slate-700 text-sm">Môi trường phòng xuất film bị ẩm và nhiệt độ không ổn định khiến cuộn film bị co dãn vật lý trước khi đem đi phơi kẽm thủ công.</p>
+                        </div>
+
+                        <!-- Nguồn gốc -->
+                        <div class="bg-blue-50/50 rounded-xl p-4 border border-blue-100">
+                            <h3 class="text-xs font-bold text-blue-800 mb-1.5 uppercase tracking-wide">
+                                <i class="fas fa-folder-open mr-1"></i> Nguồn gốc file
+                            </h3>
+                            <p class="text-slate-700 text-sm font-medium">Bản film tách màu từ máy Imagesetter cũ.</p>
+                        </div>
+
+                        <!-- Ghi nhận bởi -->
+                        <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                            <h3 class="text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">
+                                <i class="fas fa-user-edit mr-1"></i> Ghi nhận bởi
+                            </h3>
+                            <p class="text-slate-700 text-sm font-medium">Thợ đứng máy in / Đồng nghiệp</p>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Post 4: Trước khi in -->
+            <article class="post-card bg-white rounded-3xl p-4 sm:p-6 shadow-soft hover:shadow-soft-hover border border-slate-100 transition-all duration-300 flex flex-col md:flex-row gap-6" data-tags="truoc-khi-in">
+                <!-- Square Thumbnail -->
+                <div class="img-zoom-container relative w-full md:w-64 lg:w-[320px] flex-shrink-0 aspect-square rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1588345921523-c2dcdb7f1dcd?auto=format&fit=crop&q=80&w=800&h=800" 
+                         alt="Paper Stack" 
+                         class="w-full h-full object-cover">
+                    <!-- Post Date -->
+                    <div class="absolute top-3 left-3">
+                        <span class="px-3 py-1.5 bg-white/90 backdrop-blur-md text-slate-800 text-xs font-bold rounded-lg shadow-sm">
+                            02 Thg 10, 2026
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- Content Area -->
+                <div class="flex flex-col flex-grow">
+                    <!-- Tags -->
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="px-2.5 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-md">Trước khi in</span>
+                    </div>
+
+                    <h2 class="text-xl md:text-2xl font-bold text-slate-900 mb-6 leading-snug">
+                        Tính toán sai số lượng giấy bù hao (Spoilage)
+                    </h2>
+
+                    <!-- 4 Main Datapoints Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-grow content-start">
+                        <!-- Sự cố -->
+                        <div class="sm:col-span-2 bg-rose-50/50 rounded-xl p-4 border border-rose-100">
+                            <h3 class="text-xs font-bold text-rose-800 mb-1.5 uppercase tracking-wide">
+                                <i class="fas fa-triangle-exclamation mr-1"></i> Sự cố
+                            </h3>
+                            <p class="text-slate-700 text-sm">Thiếu hụt sản phẩm cuối cùng giao cho khách do lượng giấy hỏng trong lúc canh bài (make-ready) và kẹt giấy nhiều hơn dự kiến.</p>
+                        </div>
+
+                        <!-- Nguyên nhân -->
+                        <div class="sm:col-span-2 bg-amber-50/50 rounded-xl p-4 border border-amber-100">
+                            <h3 class="text-xs font-bold text-amber-800 mb-1.5 uppercase tracking-wide">
+                                <i class="fas fa-bug mr-1"></i> Nguyên nhân
+                            </h3>
+                            <p class="text-slate-700 text-sm">Người tính bài chỉ cho 2% giấy bù hao cho một bài in khó (phủ nền bệt rộng, giấy mỏng), không tính thêm bù hao cho khâu gia công bế dán sau in.</p>
+                        </div>
+
+                        <!-- Nguồn gốc -->
+                        <div class="bg-blue-50/50 rounded-xl p-4 border border-blue-100">
+                            <h3 class="text-xs font-bold text-blue-800 mb-1.5 uppercase tracking-wide">
+                                <i class="fas fa-folder-open mr-1"></i> Nguồn gốc file
+                            </h3>
+                            <p class="text-slate-700 text-sm font-medium">Lệnh sản xuất từ bộ phận Kế hoạch.</p>
+                        </div>
+
+                        <!-- Ghi nhận bởi -->
+                        <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                            <h3 class="text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">
+                                <i class="fas fa-user-edit mr-1"></i> Ghi nhận bởi
+                            </h3>
+                            <p class="text-slate-700 text-sm font-medium">Bạn bè (Quản đốc xưởng)</p>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Post 5: Thành phẩm -->
+            <article class="post-card bg-white rounded-3xl p-4 sm:p-6 shadow-soft hover:shadow-soft-hover border border-slate-100 transition-all duration-300 flex flex-col md:flex-row gap-6" data-tags="sau-khi-in">
+                <!-- Square Thumbnail -->
+                <div class="img-zoom-container relative w-full md:w-64 lg:w-[320px] flex-shrink-0 aspect-square rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1544396821-4dd40b938ad3?auto=format&fit=crop&q=80&w=800&h=800" 
+                         alt="Book Binding" 
+                         class="w-full h-full object-cover">
+                    <!-- Post Date -->
+                    <div class="absolute top-3 left-3">
+                        <span class="px-3 py-1.5 bg-white/90 backdrop-blur-md text-slate-800 text-xs font-bold rounded-lg shadow-sm">
+                            28 Thg 09, 2026
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- Content Area -->
+                <div class="flex flex-col flex-grow">
+                    <!-- Tags -->
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="px-2.5 py-1 bg-pink-100 text-pink-700 text-xs font-bold rounded-md">Sau khi in / Thành phẩm</span>
+                    </div>
+
+                    <h2 class="text-xl md:text-2xl font-bold text-slate-900 mb-6 leading-snug">
+                        Nứt gáy sách và lẹm chữ khi cấn bế/xén
+                    </h2>
+
+                    <!-- 4 Main Datapoints Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-grow content-start">
+                        <!-- Sự cố -->
+                        <div class="sm:col-span-2 bg-rose-50/50 rounded-xl p-4 border border-rose-100">
+                            <h3 class="text-xs font-bold text-rose-800 mb-1.5 uppercase tracking-wide">
+                                <i class="fas fa-triangle-exclamation mr-1"></i> Sự cố
+                            </h3>
+                            <p class="text-slate-700 text-sm">Gáy sách bị nứt vỡ mực thấy rõ lõi giấy trắng. Viền trang sách bị xén phạm vào nội dung văn bản ở sát mép.</p>
+                        </div>
+
+                        <!-- Nguyên nhân -->
+                        <div class="sm:col-span-2 bg-amber-50/50 rounded-xl p-4 border border-amber-100">
+                            <h3 class="text-xs font-bold text-amber-800 mb-1.5 uppercase tracking-wide">
+                                <i class="fas fa-bug mr-1"></i> Nguyên nhân
+                            </h3>
+                            <p class="text-slate-700 text-sm">Không cán màng bảo vệ cho bìa có nền bệt tối màu. Designer không chừa lề cắt (Bleed) và đặt text quá sát mép xén (Safe Zone) trong file thiết kế.</p>
+                        </div>
+
+                        <!-- Nguồn gốc -->
+                        <div class="bg-blue-50/50 rounded-xl p-4 border border-blue-100">
+                            <h3 class="text-xs font-bold text-blue-800 mb-1.5 uppercase tracking-wide">
+                                <i class="fas fa-folder-open mr-1"></i> Nguồn gốc file
+                            </h3>
+                            <p class="text-slate-700 text-sm font-medium">Bản bình PDF từ phòng chế bản & File gốc.</p>
+                        </div>
+
+                        <!-- Ghi nhận bởi -->
+                        <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                            <h3 class="text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">
+                                <i class="fas fa-user-edit mr-1"></i> Ghi nhận bởi
+                            </h3>
+                            <p class="text-slate-700 text-sm font-medium">Do Nguyen (Tự kiểm tra KCS)</p>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+        </main>
+    </div>
+
+    <!-- Exact Footer Required -->
+    <footer class="bg-slate-900 mt-auto">
+        <div class="max-w-6xl mx-auto px-4 py-8 text-center">
+            <p class="text-slate-400 text-sm font-medium">
+                © 2026 Do Nguyen | 20261015-5992
+            </p>
+        </div>
+    </footer>
+
+    <!-- Filtering JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            const posts = document.querySelectorAll('.post-card');
+
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // 1. Reset all buttons to inactive styling
+                    filterBtns.forEach(b => {
+                        b.classList.remove('bg-brand-600', 'text-white', 'shadow-md', 'shadow-brand-500/30');
+                        b.classList.add('bg-white', 'text-slate-600');
+                    });
+                    
+                    // 2. Add active styling to clicked button
+                    btn.classList.remove('bg-white', 'text-slate-600');
+                    btn.classList.add('bg-brand-600', 'text-white', 'shadow-md', 'shadow-brand-500/30');
+
+                    const filterValue = btn.getAttribute('data-filter');
+
+                    // 3. Filter posts
+                    posts.forEach(post => {
+                        const postTags = post.getAttribute('data-tags');
+                        
+                        if (filterValue === 'all' || postTags.includes(filterValue)) {
+                            post.style.display = 'flex';
+                            // Small timeout to allow display:flex to apply before setting opacity for transition
+                            setTimeout(() => {
+                                post.style.opacity = '1';
+                                post.style.transform = 'translateY(0)';
+                            }, 10);
+                        } else {
+                            post.style.opacity = '0';
+                            post.style.transform = 'translateY(10px)';
+                            setTimeout(() => {
+                                post.style.display = 'none';
+                            }, 300); // Matches transition duration
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
