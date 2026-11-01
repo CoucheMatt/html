@@ -1,0 +1,1448 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo Cáo Sản Xuất</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* CSS cho thẻ Tùy chỉnh */
+        Tochuyen_donguyen_200187 {
+            margin-bottom: 20px;
+            margin-top: 20px;
+            text-transform: uppercase;
+            background: linear-gradient(45deg, #1a73e8, #ff007a);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: bold;
+            font-size: 24px;
+            display: table;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Khung thông báo nội quy: Nền Pantone 9021 C 25% (#F1E7E4) giữ nguyên, nội dung màu đen */
+        .noi-quy-pantone-9021c {
+            background-color: rgba(241, 231, 228, 0.25) !important;
+            color: #000000 !important;
+            border: 1px solid rgba(241, 231, 228, 0.6);
+            border-radius: 1rem;
+        }
+
+        /* Hiệu ứng Toast Notification */
+        .toast {
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            transform: translateY(-100%);
+            opacity: 0;
+        }
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Hiệu ứng Custom Modal */
+        .modal-overlay {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease-in-out;
+        }
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            transform: scale(0.9);
+            transition: transform 0.2s ease-in-out;
+        }
+        .modal-overlay.show .modal-content {
+            transform: scale(1);
+        }
+
+        /* Tùy chỉnh thanh cuộn (Scrollbar) cho danh sách lịch sử & checklist vật tư */
+        #historyList::-webkit-scrollbar,
+        #materialListContainer::-webkit-scrollbar,
+        #stepEditListModal::-webkit-scrollbar {
+            width: 6px;
+        }
+        #historyList::-webkit-scrollbar-track,
+        #materialListContainer::-webkit-scrollbar-track,
+        #stepEditListModal::-webkit-scrollbar-track {
+            background: #f8fafc; 
+            border-radius: 8px;
+        }
+        #historyList::-webkit-scrollbar-thumb,
+        #materialListContainer::-webkit-scrollbar-thumb,
+        #stepEditListModal::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 8px;
+        }
+        #historyList::-webkit-scrollbar-thumb:hover,
+        #materialListContainer::-webkit-scrollbar-thumb:hover,
+        #stepEditListModal::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans min-h-screen flex flex-col relative">
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 flex flex-col gap-2 w-[90%] max-w-md"></div>
+
+    <!-- Main Content -->
+    <main class="flex-grow p-4 lg:p-8">
+        <Tochuyen_donguyen_200187 class="header-title">Báo Cáo Sản Xuất 20261101-2143</Tochuyen_donguyen_200187>
+
+        <!-- Layout 1 cột trải rộng -->
+        <div class="max-w-5xl mx-auto flex flex-col gap-8 items-stretch">
+
+            <!-- Thông báo Nội quy chung: Nền giữ nguyên Pantone 9021 C 25%, nội dung màu đen -->
+            <div class="noi-quy-pantone-9021c p-5 sm:p-6 shadow-sm">
+                <div class="flex items-center gap-2 mb-3">
+                    <svg class="w-5 h-5 shrink-0 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <h3 class="text-base font-extrabold tracking-wide uppercase text-black">Nội Quy Nhập Liệu Sản Xuất</h3>
+                </div>
+                <ul class="text-sm font-semibold space-y-1.5 list-disc list-inside leading-relaxed text-black">
+                    <li>Đối chiếu chính xác <strong>Mã đơn hàng</strong> và <strong>Số lượng thực tế</strong> trước khi nhấn gửi báo cáo.</li>
+                    <li><strong>Thời gian:</strong> Nhập đúng Giờ bắt đầu và Giờ kết thúc theo ca máy thực chạy (hệ thống tự động tính phút).</li>
+                    <li><strong>Vật tư & Thông số:</strong> Chọn đúng loại giấy/decal kèm nhà cung cấp và thông số kỹ thuật (Tốc độ, Nhiệt độ, Tram, Nhíp, Overprint, Tay kê).</li>
+                    <li><strong>Bàn giao công đoạn:</strong> Sau khi hoàn thành phải gửi báo cáo ngay để công đoạn sau nắm thời gian chờ thực tế (Realtime).</li>
+                </ul>
+            </div>
+            
+            <!-- Phần 1: Form Nhập Liệu -->
+            <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+                <form id="reportForm" class="space-y-5">
+                    
+                    <!-- ID / Họ tên nhân viên -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Họ tên nhân viên</label>
+                            <input type="text" id="empName" required value="Do Nguyen"
+                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">ID Nhân viên</label>
+                            <input type="text" id="empId" required value="R200187"
+                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
+                        </div>
+                    </div>
+
+                    <!-- Checklist Team làm việc chung -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Team làm việc chung</label>
+                        <div id="teamContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <!-- Mục tự động lấy từ Họ tên / ID nhân viên chính -->
+                            <label class="flex items-center space-x-3 cursor-pointer p-1.5 hover:bg-white rounded transition-colors border border-transparent hover:border-gray-200">
+                                <input type="checkbox" id="teamMainUserCheck" class="team-check w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
+                                <span class="text-sm font-medium text-gray-800" id="teamMainUserLabel">Do Nguyen / R200187</span>
+                            </label>
+
+                            <!-- Nhân viên bổ sung: Hong Thuy/R2343 -->
+                            <label class="flex items-center space-x-3 cursor-pointer p-1.5 hover:bg-white rounded transition-colors border border-transparent hover:border-gray-200">
+                                <input type="checkbox" value="Hong Thuy / R2343" class="team-check w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
+                                <span class="text-sm font-medium text-gray-800">Hong Thuy / R2343</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Công đoạn / Máy -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Máy / Công đoạn</label>
+                        <select id="machine" required
+                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white">
+                            <optgroup label="Máy in">
+                                <option value="Máy in - CD1">Máy in - CD1</option>
+                                <option value="Máy in - CD2">Máy in - CD2</option>
+                                <option value="Máy in - 6C">Máy in - 6C</option>
+                            </optgroup>
+                            <optgroup label="Máy bế">
+                                <option value="Máy bế 1">Máy bế 1</option>
+                                <option value="Máy bế 2">Máy bế 2</option>
+                            </optgroup>
+                        </select>
+
+                        <!-- Khung hiển thị quy tắc riêng theo từng công đoạn -->
+                        <div id="machineRuleBox" class="mt-2.5 p-3.5 bg-blue-50/70 border border-blue-200 rounded-xl flex items-start gap-3 transition-all">
+                            <div class="p-1 bg-blue-100 rounded-lg text-blue-700 shrink-0 mt-0.5">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </div>
+                            <div class="text-xs text-blue-950 flex-1 leading-relaxed">
+                                <strong id="machineRuleTitle" class="font-bold uppercase tracking-wider block text-blue-800 mb-0.5">Quy tắc công đoạn</strong>
+                                <span id="machineRuleContent" class="font-medium text-slate-700"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ID Đơn hàng -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">ID Đơn hàng</label>
+                        <input list="orderList" id="orderId" required placeholder="Nhập hoặc chọn ID đơn hàng..."
+                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
+                        <datalist id="orderList">
+                            <option value="20261101-1615 - CTP - UQ Basesheet">
+                            <option value="20261101-8840 - Tran vach Panel">
+                        </datalist>
+
+                        <!-- KHUNG THÔNG TIN CHI TIẾT ĐƠN HÀNG -->
+                        <div id="orderDetailCard" class="hidden mt-3 p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3.5 transition-all">
+                            <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-blue-600 animate-pulse"></span>
+                                    <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Thông Tin Kỹ Thuật Đơn Hàng</h4>
+                                </div>
+                                <span id="orderDeadlineBadge" class="text-xs font-extrabold px-2.5 py-0.5 rounded-md bg-amber-100 text-amber-800 border border-amber-200"></span>
+                            </div>
+
+                            <!-- Lưới thông tin chung -->
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+                                <div class="p-2.5 bg-white rounded-lg border border-slate-100 shadow-sm">
+                                    <span class="text-slate-400 block font-semibold mb-0.5">QUY CÁCH / KÍCH THƯỚC</span>
+                                    <span id="orderSpecsText" class="font-bold text-slate-800 leading-snug"></span>
+                                </div>
+                                <div class="p-2.5 bg-white rounded-lg border border-slate-100 shadow-sm">
+                                    <span class="text-slate-400 block font-semibold mb-0.5">VẬT TƯ CHỈ ĐỊNH</span>
+                                    <span id="orderMaterialText" class="font-bold text-blue-700 leading-snug"></span>
+                                </div>
+                                <div class="p-2.5 bg-white rounded-lg border border-slate-100 shadow-sm">
+                                    <span class="text-slate-400 block font-semibold mb-0.5">THỜI GIAN GIAO HÀNG</span>
+                                    <span id="orderDeliveryText" class="font-bold text-red-600 leading-snug"></span>
+                                </div>
+                            </div>
+
+                            <!-- Ghi chú đặc biệt -->
+                            <div class="p-2.5 bg-amber-50/70 border border-amber-200/80 rounded-lg text-xs text-amber-900 flex items-start gap-2">
+                                <svg class="w-4 h-4 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                <div>
+                                    <strong class="font-bold">Ghi chú kỹ thuật đặc biệt:</strong>
+                                    <span id="orderNoteText" class="ml-1 font-medium"></span>
+                                </div>
+                            </div>
+
+                            <!-- Các bước công đoạn: Giữ nguyên CSS cũ đẹp, có nút Edit -->
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">Công đoạn từng bước phải hoàn thành:</span>
+                                    <button type="button" onclick="openStepEditModal()" 
+                                        class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg border border-blue-200 transition-colors shadow-xs">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                        Chỉnh sửa công đoạn
+                                    </button>
+                                </div>
+                                <!-- Vùng hiển thị chuẩn CSS badge pill đẹp như cũ -->
+                                <div id="orderStepsContainer" class="flex flex-wrap gap-2"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Số lượng & Đơn vị -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Số lượng</label>
+                            <input type="number" id="quantity" required min="1" placeholder="Nhập số lượng..."
+                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Đơn vị</label>
+                            <select id="unit" required
+                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white">
+                                <option value="Tờ">Tờ</option>
+                                <option value="Cuốn">Cuốn</option>
+                                <option value="Hộp">Hộp</option>
+                                <option value="Thùng">Thùng</option>
+                                <option value="Bộ">Bộ</option>
+                                <option value="Cái">Cái</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Thời gian & Số phút -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Giờ bắt đầu</label>
+                            <input type="datetime-local" id="startTime" required
+                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Giờ kết thúc</label>
+                            <input type="datetime-local" id="endTime" required
+                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Số phút (Ước tính)</label>
+                            <input type="number" id="durationMinutes" min="1" placeholder="VD: 60"
+                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-blue-700 font-bold">
+                        </div>
+                    </div>
+
+                    <!-- Checklist Vật tư & Chi tiết -->
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="text-sm font-semibold text-gray-700">Checklist Vật tư sử dụng</label>
+                            <span id="selectedCountBadge" class="text-xs bg-blue-50 text-blue-700 font-bold px-2.5 py-0.5 rounded-full border border-blue-100 hidden">Đã chọn: 0</span>
+                        </div>
+                        
+                        <!-- Ô tìm kiếm vật tư -->
+                        <div class="relative mb-2">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                            </span>
+                            <input type="text" id="materialSearchInput" placeholder="Tìm nhanh giấy, decal, nhà cung cấp (Couche, Ford, Lan Vi...)..."
+                                class="w-full pl-9 pr-8 py-2 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white">
+                            <button type="button" id="clearSearchBtn" onclick="clearMaterialSearch()" class="absolute inset-y-0 right-0 items-center pr-3 text-gray-400 hover:text-gray-600 hidden">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                        </div>
+
+                        <!-- Khung cuộn danh sách vật tư -->
+                        <div id="materialListContainer" class="max-h-64 overflow-y-auto bg-gray-50 p-2 sm:p-3 rounded-lg border border-gray-200 mb-3 space-y-1">
+                            
+                            <!-- Couche -->
+                            <label class="material-item flex items-center justify-between p-2 hover:bg-white rounded-lg transition-colors border border-transparent hover:border-gray-200 cursor-pointer">
+                                <div class="flex items-center space-x-3">
+                                    <input type="checkbox" value="Couche 150 | Phùng Vĩnh Hưng" class="material-check w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                    <span class="text-sm font-semibold text-gray-800">Couche 150</span>
+                                </div>
+                                <span class="text-[11px] font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded">Phùng Vĩnh Hưng</span>
+                            </label>
+
+                            <label class="material-item flex items-center justify-between p-2 hover:bg-white rounded-lg transition-colors border border-transparent hover:border-gray-200 cursor-pointer">
+                                <div class="flex items-center space-x-3">
+                                    <input type="checkbox" value="Couche 250 | Phùng Vĩnh Hưng" class="material-check w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                    <span class="text-sm font-semibold text-gray-800">Couche 250</span>
+                                </div>
+                                <span class="text-[11px] font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded">Phùng Vĩnh Hưng</span>
+                            </label>
+
+                            <label class="material-item flex items-center justify-between p-2 hover:bg-white rounded-lg transition-colors border border-transparent hover:border-gray-200 cursor-pointer">
+                                <div class="flex items-center space-x-3">
+                                    <input type="checkbox" value="Couche 300 | Phùng Vĩnh Hưng" class="material-check w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                    <span class="text-sm font-semibold text-gray-800">Couche 300</span>
+                                </div>
+                                <span class="text-[11px] font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded">Phùng Vĩnh Hưng</span>
+                            </label>
+
+                            <label class="material-item flex items-center justify-between p-2 hover:bg-white rounded-lg transition-colors border border-transparent hover:border-gray-200 cursor-pointer">
+                                <div class="flex items-center space-x-3">
+                                    <input type="checkbox" value="Couche Matt 150 | Phùng Vĩnh Hưng" class="material-check w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                    <span class="text-sm font-semibold text-gray-800">Couche Matt 150</span>
+                                </div>
+                                <span class="text-[11px] font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded">Phùng Vĩnh Hưng</span>
+                            </label>
+
+                            <!-- Ford -->
+                            <label class="material-item flex items-center justify-between p-2 hover:bg-white rounded-lg transition-colors border border-transparent hover:border-gray-200 cursor-pointer">
+                                <div class="flex items-center space-x-3">
+                                    <input type="checkbox" value="Ford 70 | Phùng Vĩnh Hưng" class="material-check w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                    <span class="text-sm font-semibold text-gray-800">Ford 70</span>
+                                </div>
+                                <span class="text-[11px] font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded">Phùng Vĩnh Hưng</span>
+                            </label>
+
+                            <label class="material-item flex items-center justify-between p-2 hover:bg-white rounded-lg transition-colors border border-transparent hover:border-gray-200 cursor-pointer">
+                                <div class="flex items-center space-x-3">
+                                    <input type="checkbox" value="Ford 80 | Phùng Vĩnh Hưng" class="material-check w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                    <span class="text-sm font-semibold text-gray-800">Ford 80</span>
+                                </div>
+                                <span class="text-[11px] font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded">Phùng Vĩnh Hưng</span>
+                            </label>
+
+                            <label class="material-item flex items-center justify-between p-2 hover:bg-white rounded-lg transition-colors border border-transparent hover:border-gray-200 cursor-pointer">
+                                <div class="flex items-center space-x-3">
+                                    <input type="checkbox" value="Ford 100 | Phùng Vĩnh Hưng" class="material-check w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                    <span class="text-sm font-semibold text-gray-800">Ford 100</span>
+                                </div>
+                                <span class="text-[11px] font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded">Phùng Vĩnh Hưng</span>
+                            </label>
+
+                            <!-- Ivory -->
+                            <label class="material-item flex items-center justify-between p-2 hover:bg-white rounded-lg transition-colors border border-transparent hover:border-gray-200 cursor-pointer">
+                                <div class="flex items-center space-x-3">
+                                    <input type="checkbox" value="Ivory 250 | Phùng Vĩnh Hưng" class="material-check w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                    <span class="text-sm font-semibold text-gray-800">Ivory 250</span>
+                                </div>
+                                <span class="text-[11px] font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded">Phùng Vĩnh Hưng</span>
+                            </label>
+
+                            <label class="material-item flex items-center justify-between p-2 hover:bg-white rounded-lg transition-colors border border-transparent hover:border-gray-200 cursor-pointer">
+                                <div class="flex items-center space-x-3">
+                                    <input type="checkbox" value="Ivory 300 | Phùng Vĩnh Hưng" class="material-check w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                    <span class="text-sm font-semibold text-gray-800">Ivory 300</span>
+                                </div>
+                                <span class="text-[11px] font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded">Phùng Vĩnh Hưng</span>
+                            </label>
+
+                            <label class="material-item flex items-center justify-between p-2 hover:bg-white rounded-lg transition-colors border border-transparent hover:border-gray-200 cursor-pointer">
+                                <div class="flex items-center space-x-3">
+                                    <input type="checkbox" value="Ivory 350 | Phùng Vĩnh Hưng" class="material-check w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                    <span class="text-sm font-semibold text-gray-800">Ivory 350</span>
+                                </div>
+                                <span class="text-[11px] font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded">Phùng Vĩnh Hưng</span>
+                            </label>
+
+                            <!-- Bristol -->
+                            <label class="material-item flex items-center justify-between p-2 hover:bg-white rounded-lg transition-colors border border-transparent hover:border-gray-200 cursor-pointer">
+                                <div class="flex items-center space-x-3">
+                                    <input type="checkbox" value="Bristol 280 | Phùng Vĩnh Hưng" class="material-check w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                    <span class="text-sm font-semibold text-gray-800">Bristol 280</span>
+                                </div>
+                                <span class="text-[11px] font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded">Phùng Vĩnh Hưng</span>
+                            </label>
+
+                            <label class="material-item flex items-center justify-between p-2 hover:bg-white rounded-lg transition-colors border border-transparent hover:border-gray-200 cursor-pointer">
+                                <div class="flex items-center space-x-3">
+                                    <input type="checkbox" value="Bristol 300 | Phùng Vĩnh Hưng" class="material-check w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                    <span class="text-sm font-semibold text-gray-800">Bristol 300</span>
+                                </div>
+                                <span class="text-[11px] font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded">Phùng Vĩnh Hưng</span>
+                            </label>
+
+                            <label class="material-item flex items-center justify-between p-2 hover:bg-white rounded-lg transition-colors border border-transparent hover:border-gray-200 cursor-pointer">
+                                <div class="flex items-center space-x-3">
+                                    <input type="checkbox" value="Bristol 350 | Phùng Vĩnh Hưng" class="material-check w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                    <span class="text-sm font-semibold text-gray-800">Bristol 350</span>
+                                </div>
+                                <span class="text-[11px] font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded">Phùng Vĩnh Hưng</span>
+                            </label>
+
+                            <!-- Duplex -->
+                            <label class="material-item flex items-center justify-between p-2 hover:bg-white rounded-lg transition-colors border border-transparent hover:border-gray-200 cursor-pointer">
+                                <div class="flex items-center space-x-3">
+                                    <input type="checkbox" value="Duplex 250 | Phùng Vĩnh Hưng" class="material-check w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                    <span class="text-sm font-semibold text-gray-800">Duplex 250</span>
+                                </div>
+                                <span class="text-[11px] font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded">Phùng Vĩnh Hưng</span>
+                            </label>
+
+                            <label class="material-item flex items-center justify-between p-2 hover:bg-white rounded-lg transition-colors border border-transparent hover:border-gray-200 cursor-pointer">
+                                <div class="flex items-center space-x-3">
+                                    <input type="checkbox" value="Duplex 300 | Phùng Vĩnh Hưng" class="material-check w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                    <span class="text-sm font-semibold text-gray-800">Duplex 300</span>
+                                </div>
+                                <span class="text-[11px] font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded">Phùng Vĩnh Hưng</span>
+                            </label>
+
+                            <label class="material-item flex items-center justify-between p-2 hover:bg-white rounded-lg transition-colors border border-transparent hover:border-gray-200 cursor-pointer">
+                                <div class="flex items-center space-x-3">
+                                    <input type="checkbox" value="Duplex 350 | Phùng Vĩnh Hưng" class="material-check w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                    <span class="text-sm font-semibold text-gray-800">Duplex 350</span>
+                                </div>
+                                <span class="text-[11px] font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded">Phùng Vĩnh Hưng</span>
+                            </label>
+
+                            <label class="material-item flex items-center justify-between p-2 hover:bg-white rounded-lg transition-colors border border-transparent hover:border-gray-200 cursor-pointer">
+                                <div class="flex items-center space-x-3">
+                                    <input type="checkbox" value="Duplex 400 | Phùng Vĩnh Hưng" class="material-check w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                    <span class="text-sm font-semibold text-gray-800">Duplex 400</span>
+                                </div>
+                                <span class="text-[11px] font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded">Phùng Vĩnh Hưng</span>
+                            </label>
+
+                            <!-- Kraft -->
+                            <label class="material-item flex items-center justify-between p-2 hover:bg-white rounded-lg transition-colors border border-transparent hover:border-gray-200 cursor-pointer">
+                                <div class="flex items-center space-x-3">
+                                    <input type="checkbox" value="Kraft 120 | Phùng Vĩnh Hưng" class="material-check w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                    <span class="text-sm font-semibold text-gray-800">Kraft 120</span>
+                                </div>
+                                <span class="text-[11px] font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded">Phùng Vĩnh Hưng</span>
+                            </label>
+
+                            <label class="material-item flex items-center justify-between p-2 hover:bg-white rounded-lg transition-colors border border-transparent hover:border-gray-200 cursor-pointer">
+                                <div class="flex items-center space-x-3">
+                                    <input type="checkbox" value="Kraft 250 | Phùng Vĩnh Hưng" class="material-check w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                    <span class="text-sm font-semibold text-gray-800">Kraft 250</span>
+                                </div>
+                                <span class="text-[11px] font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded">Phùng Vĩnh Hưng</span>
+                            </label>
+
+                            <label class="material-item flex items-center justify-between p-2 hover:bg-white rounded-lg transition-colors border border-transparent hover:border-gray-200 cursor-pointer">
+                                <div class="flex items-center space-x-3">
+                                    <input type="checkbox" value="Kraft 280 | Phùng Vĩnh Hưng" class="material-check w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                    <span class="text-sm font-semibold text-gray-800">Kraft 280</span>
+                                </div>
+                                <span class="text-[11px] font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded">Phùng Vĩnh Hưng</span>
+                            </label>
+
+                            <!-- Lan Vi -->
+                            <label class="material-item flex items-center justify-between p-2 hover:bg-white rounded-lg transition-colors border border-transparent hover:border-gray-200 cursor-pointer">
+                                <div class="flex items-center space-x-3">
+                                    <input type="checkbox" value="Safari 250 | Lan Vi" class="material-check w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                    <span class="text-sm font-semibold text-gray-800">Safari 250</span>
+                                </div>
+                                <span class="text-[11px] font-medium text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">Lan Vi</span>
+                            </label>
+
+                            <label class="material-item flex items-center justify-between p-2 hover:bg-white rounded-lg transition-colors border border-transparent hover:border-gray-200 cursor-pointer">
+                                <div class="flex items-center space-x-3">
+                                    <input type="checkbox" value="Econo 300 | Lan Vi" class="material-check w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                    <span class="text-sm font-semibold text-gray-800">Econo 300</span>
+                                </div>
+                                <span class="text-[11px] font-medium text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">Lan Vi</span>
+                            </label>
+
+                            <label class="material-item flex items-center justify-between p-2 hover:bg-white rounded-lg transition-colors border border-transparent hover:border-gray-200 cursor-pointer">
+                                <div class="flex items-center space-x-3">
+                                    <input type="checkbox" value="Astrosilver 250 | Lan Vi" class="material-check w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                    <span class="text-sm font-semibold text-gray-800">Astrosilver 250</span>
+                                </div>
+                                <span class="text-[11px] font-medium text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">Lan Vi</span>
+                            </label>
+
+                            <!-- Decal Amazon -->
+                            <label class="material-item flex items-center justify-between p-2 hover:bg-white rounded-lg transition-colors border border-transparent hover:border-gray-200 cursor-pointer">
+                                <div class="flex items-center space-x-3">
+                                    <input type="checkbox" value="Decal giấy đế vàng | Amazon" class="material-check w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                    <span class="text-sm font-semibold text-gray-800">Decal giấy đế vàng</span>
+                                </div>
+                                <span class="text-[11px] font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded">Amazon</span>
+                            </label>
+
+                            <label class="material-item flex items-center justify-between p-2 hover:bg-white rounded-lg transition-colors border border-transparent hover:border-gray-200 cursor-pointer">
+                                <div class="flex items-center space-x-3">
+                                    <input type="checkbox" value="Decal giấy đế xanh | Amazon" class="material-check w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                    <span class="text-sm font-semibold text-gray-800">Decal giấy đế xanh</span>
+                                </div>
+                                <span class="text-[11px] font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded">Amazon</span>
+                            </label>
+
+                            <!-- Decal Khải Hoàn -->
+                            <label class="material-item flex items-center justify-between p-2 hover:bg-white rounded-lg transition-colors border border-transparent hover:border-gray-200 cursor-pointer">
+                                <div class="flex items-center space-x-3">
+                                    <input type="checkbox" value="Decal nhựa sữa | Khải Hoàn" class="material-check w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                    <span class="text-sm font-semibold text-gray-800">Decal nhựa sữa</span>
+                                </div>
+                                <span class="text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">Khải Hoàn</span>
+                            </label>
+
+                            <label class="material-item flex items-center justify-between p-2 hover:bg-white rounded-lg transition-colors border border-transparent hover:border-gray-200 cursor-pointer">
+                                <div class="flex items-center space-x-3">
+                                    <input type="checkbox" value="Decal bể | Khải Hoàn" class="material-check w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                    <span class="text-sm font-semibold text-gray-800">Decal bể</span>
+                                </div>
+                                <span class="text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">Khải Hoàn</span>
+                            </label>
+
+                            <div id="noMaterialFound" class="text-center text-gray-400 py-4 text-xs italic hidden">
+                                Không tìm thấy vật tư phù hợp.
+                            </div>
+                        </div>
+
+                        <!-- Chi tiết vật tư -->
+                        <input type="text" id="materialDetails" placeholder="Chi tiết vật tư (Nhập tên cuộn, quy cách, kích thước, lô, v.v...)"
+                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
+                    </div>
+
+                    <!-- Checklist Thông số vận hành -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Thông số vận hành (Tốc độ, Nhiệt độ, Tram, Nhíp, Overprint, Tay kê)</label>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-gray-50 p-4 rounded-lg border border-gray-200 mb-3">
+                            <!-- Tốc độ -->
+                            <label class="flex items-center space-x-3 cursor-pointer p-1.5 hover:bg-white rounded transition-colors border border-transparent hover:border-gray-200">
+                                <input type="checkbox" value="Tốc độ: 5000/h" class="param-check w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500">
+                                <span class="text-sm font-medium text-gray-800">Tốc độ: 5000/h</span>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer p-1.5 hover:bg-white rounded transition-colors border border-transparent hover:border-gray-200">
+                                <input type="checkbox" value="Tốc độ: 10000/h" class="param-check w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500">
+                                <span class="text-sm font-medium text-gray-800">Tốc độ: 10000/h</span>
+                            </label>
+
+                            <!-- Nhiệt độ -->
+                            <label class="flex items-center space-x-3 cursor-pointer p-1.5 hover:bg-white rounded transition-colors border border-transparent hover:border-gray-200">
+                                <input type="checkbox" value="Nhiệt độ: 50°C" class="param-check w-5 h-5 text-orange-500 rounded focus:ring-orange-500">
+                                <span class="text-sm font-medium text-gray-800">Nhiệt độ: 50°C</span>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer p-1.5 hover:bg-white rounded transition-colors border border-transparent hover:border-gray-200">
+                                <input type="checkbox" value="Nhiệt độ: 100°C" class="param-check w-5 h-5 text-orange-500 rounded focus:ring-orange-500">
+                                <span class="text-sm font-medium text-gray-800">Nhiệt độ: 100°C</span>
+                            </label>
+                            
+                            <!-- Tram -->
+                            <label class="flex items-center space-x-3 cursor-pointer p-1.5 hover:bg-white rounded transition-colors border border-transparent hover:border-gray-200">
+                                <input type="checkbox" value="Tram: 175" class="param-check w-5 h-5 text-emerald-500 rounded focus:ring-emerald-500">
+                                <span class="text-sm font-medium text-gray-800">Tram: 175</span>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer p-1.5 hover:bg-white rounded transition-colors border border-transparent hover:border-gray-200">
+                                <input type="checkbox" value="Tram: 200" class="param-check w-5 h-5 text-emerald-500 rounded focus:ring-emerald-500">
+                                <span class="text-sm font-medium text-gray-800">Tram: 200</span>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer p-1.5 hover:bg-white rounded transition-colors border border-transparent hover:border-gray-200">
+                                <input type="checkbox" value="Tram: 133" class="param-check w-5 h-5 text-emerald-500 rounded focus:ring-emerald-500">
+                                <span class="text-sm font-medium text-gray-800">Tram: 133</span>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer p-1.5 hover:bg-white rounded transition-colors border border-transparent hover:border-gray-200">
+                                <input type="checkbox" value="Tram: 70" class="param-check w-5 h-5 text-emerald-500 rounded focus:ring-emerald-500">
+                                <span class="text-sm font-medium text-gray-800">Tram: 70</span>
+                            </label>
+
+                            <!-- Nhíp -->
+                            <label class="flex items-center space-x-3 cursor-pointer p-1.5 hover:bg-white rounded transition-colors border border-transparent hover:border-gray-200">
+                                <input type="checkbox" value="Nhíp: 12mm" class="param-check w-5 h-5 text-purple-600 rounded focus:ring-purple-500">
+                                <span class="text-sm font-medium text-gray-800">Nhíp 12mm</span>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer p-1.5 hover:bg-white rounded transition-colors border border-transparent hover:border-gray-200">
+                                <input type="checkbox" value="Nhíp: 15mm" class="param-check w-5 h-5 text-purple-600 rounded focus:ring-purple-500">
+                                <span class="text-sm font-medium text-gray-800">Nhíp 15mm</span>
+                            </label>
+
+                            <!-- Overprint -->
+                            <label class="flex items-center space-x-3 cursor-pointer p-1.5 hover:bg-white rounded transition-colors border border-transparent hover:border-gray-200">
+                                <input type="checkbox" value="Giữ Overprint" class="param-check w-5 h-5 text-cyan-600 rounded focus:ring-cyan-500">
+                                <span class="text-sm font-medium text-gray-800">Giữ Overprint</span>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer p-1.5 hover:bg-white rounded transition-colors border border-transparent hover:border-gray-200">
+                                <input type="checkbox" value="Bỏ Overprint" class="param-check w-5 h-5 text-rose-600 rounded focus:ring-rose-500">
+                                <span class="text-sm font-medium text-gray-800">Bỏ Overprint</span>
+                            </label>
+
+                            <!-- Tay kê -->
+                            <label class="flex items-center space-x-3 cursor-pointer p-1.5 hover:bg-white rounded transition-colors border border-transparent hover:border-gray-200">
+                                <input type="checkbox" value="Tay kê thuận" class="param-check w-5 h-5 text-amber-600 rounded focus:ring-amber-500">
+                                <span class="text-sm font-medium text-gray-800">Tay kê thuận</span>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer p-1.5 hover:bg-white rounded transition-colors border border-transparent hover:border-gray-200">
+                                <input type="checkbox" value="Tay kê nghịch" class="param-check w-5 h-5 text-amber-600 rounded focus:ring-amber-500">
+                                <span class="text-sm font-medium text-gray-800">Tay kê nghịch</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Ghi chú -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Ghi chú (Tùy chọn)</label>
+                        <textarea id="note" rows="2" placeholder="Nhập ghi chú nếu có..."
+                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"></textarea>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="flex gap-3">
+                        <button type="submit" id="submitBtn"
+                            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-md transition-all active:scale-[0.98]">
+                            Gửi Báo Cáo
+                        </button>
+                        <button type="button" id="cancelEditBtn" onclick="cancelEdit()"
+                            class="hidden bg-gray-500 hover:bg-gray-600 text-white font-bold py-3.5 px-4 rounded-xl shadow-md transition-all active:scale-[0.98]">
+                            Hủy
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Phần 2: Lịch sử báo cáo -->
+            <div class="bg-white p-6 sm:p-8 rounded-xl shadow-sm border border-gray-100">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-extrabold text-gray-800 tracking-tight">Lịch Sử Báo Cáo</h2>
+                </div>
+                <!-- Vùng chứa lịch sử -->
+                <div id="historyList" class="space-y-6 max-h-[850px] overflow-y-auto pr-3 pb-5">
+                    <!-- Các card lịch sử sẽ được render bằng JS -->
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Modal Chỉnh sửa công đoạn (Có danh sách đọc máy & người dùng có sẵn) -->
+    <div id="stepEditModal" class="fixed inset-0 bg-black bg-opacity-50 z-[110] flex items-center justify-center modal-overlay">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 w-[95%] max-w-2xl modal-content max-h-[90vh] flex flex-col">
+            <div class="flex items-center justify-between border-b border-gray-100 pb-3 mb-4">
+                <div>
+                    <h3 class="text-base font-bold text-gray-900">Cập nhật công đoạn sản xuất</h3>
+                    <p class="text-xs text-gray-500" id="stepModalOrderTitle">Đơn hàng: ...</p>
+                </div>
+                <button onclick="closeStepEditModal()" class="text-gray-400 hover:text-gray-600 p-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <!-- Danh sách công đoạn cho phép chỉnh sửa -->
+            <div id="stepEditListModal" class="overflow-y-auto pr-1 space-y-3.5 flex-1"></div>
+
+            <div class="flex justify-end gap-3 pt-4 border-t border-gray-100 mt-4">
+                <button onclick="closeStepEditModal()" class="px-5 py-2.5 text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors">Đóng</button>
+                <button onclick="saveAndApplyStepEdits()" class="px-5 py-2.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-colors shadow-md">Lưu Thay Đổi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Modal Xóa Báo Cáo -->
+    <div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-50 z-[100] flex items-center justify-center modal-overlay">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 w-[90%] max-w-sm modal-content">
+            <h3 class="text-lg font-bold text-gray-900 mb-2">Xác nhận xóa</h3>
+            <p class="text-gray-600 mb-6 text-sm">Bạn có chắc chắn muốn xóa Mã ticket <strong id="deleteTicketCode" class="text-red-600"></strong> này không? Dữ liệu không thể khôi phục.</p>
+            <div class="flex justify-end gap-3">
+                <button onclick="closeModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">Hủy</button>
+                <button id="confirmDeleteBtn" class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors shadow-md">Xóa Báo Cáo</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-gray-300 text-center py-5 mt-auto">
+        <p class="text-sm font-medium">&copy; 2026 Do Nguyen | 20261101-2143</p>
+    </footer>
+
+    <script>
+        // --- 1. BIẾN TOÀN CỤC & DỮ LIỆU ĐƠN HÀNG MẪU ---
+        let reports = JSON.parse(localStorage.getItem('production_reports')) || [];
+        let editingTicketId = null; 
+        let deletingTicketId = null; 
+
+        // Quy tắc riêng biệt cho từng công đoạn / máy
+        const machineRulesDatabase = {
+            "Máy in - CD1": "Quy tắc: Luôn kiểm tra áp lực lô ép, canh kê tay thuận/nghịch chính xác, đo độ dày kẽm và canh màu theo mẫu Proof được ký duyệt trước khi chạy tốc độ cao.",
+            "Máy in - CD2": "Quy tắc: Canh tram hạt và độ bám mực trên giấy Couche/Ford, kiểm tra độ cân bằng nước - mực (nồng độ cồn và pH máng nước) định kỳ 30 phút/lần.",
+            "Máy in - 6C": "Quy tắc: Công đoạn in 6 màu phối màu đặc biệt (Pantone). Bắt buộc test mẫu 5 tờ đầu ca, canh chỉnh overprint và kiểm tra tram 175-200 LPI.",
+            "Máy bế 1": "Quy tắc: Kiểm tra dao bế, đường cấn gân và nhíp giấy (chuẩn 12mm hoặc 15mm). Không để rách mép, thụng góc hoặc xước màng mờ/bóng.",
+            "Máy bế 2": "Quy tắc: Canh bo góc chuẩn r theo bản vẽ, kiểm tra độ sắc bén lưỡi dao đứt/cấn, rà soát phôi bế không bị dính keo hoặc bụi giấy."
+        };
+
+        // Cơ sở dữ liệu thông tin chi tiết từng đơn hàng kèm máy, người dùng, team
+        const defaultOrderDatabase = {
+            "20261101-1615 - CTP - UQ Basesheet": {
+                deadline: "02/11/2026 - 15:00",
+                deadlineStatus: "Gấp (Trong 24h)",
+                specs: "Kích thước: 320 x 430 mm | Khổ in: 650 x 860 mm | In 4 màu CMYK mặt trước",
+                materials: "Couche 300 | Phùng Vĩnh Hưng (Lô: PVH-2026-C30)",
+                delivery: "Giao kho Pearl - KCN Tân Bình (Xe tải sáng 02/11)",
+                specialNotes: "Kiểm tra độ canh màu Pantone UQ chuẩn file Proof mẫu. Bế cấn chuẩn góc bo r = 3mm, không bị trầy màng.",
+                steps: [
+                    { step: "01", name: "Xuất kẽm CTP Thermal", status: "Hoàn tất", machine: "Máy in - CD1", user: "Do Nguyen / R200187", team: "Tổ CTP" },
+                    { step: "02", name: "In Offset 4 màu", status: "Đang thực hiện", machine: "Máy in - CD1", user: "Do Nguyen / R200187", team: "Tổ In Ca 1" },
+                    { step: "03", name: "Cán màng mờ nhiệt", status: "Chờ máy", machine: "Máy bế 1", user: "Hong Thuy / R2343", team: "Tổ Thành Phẩm" },
+                    { step: "04", name: "Bế định hình", status: "Chưa tới", machine: "Máy bế 1", user: "Hong Thuy / R2343", team: "Tổ Bế" },
+                    { step: "05", name: "KCS & Đóng gói màng co", status: "Chưa tới", machine: "Máy bế 2", user: "Do Nguyen / R200187", team: "Tổ Đóng Gói" }
+                ]
+            },
+            "20261101-8840 - Tran vach Panel": {
+                deadline: "04/11/2026 - 10:30",
+                deadlineStatus: "Bình thường",
+                specs: "Kích thước: 600 x 1200 mm | Decal dán bồi formex 5mm | Cán màng bảo vệ bóng",
+                materials: "Decal nhựa sữa | Khải Hoàn (Cuộn 1.2m)",
+                delivery: "Bàn giao công trình Văn phòng Tòa nhà TechZone",
+                specialNotes: "Mực in gốc dầu ngoài trời. Khi bế chú ý không lẹm viền decal, không để bọt khí khi cán màng.",
+                steps: [
+                    { step: "01", name: "In Decal Kỹ Thuật Số", status: "Hoàn tất", machine: "Máy in - CD2", user: "Do Nguyen / R200187", team: "Tổ KTS" },
+                    { step: "02", name: "Cán màng bóng bảo vệ", status: "Đang thực hiện", machine: "Máy bế 1", user: "Hong Thuy / R2343", team: "Tổ Thành Phẩm" },
+                    { step: "03", name: "Bồi Formex 5mm", status: "Chưa tới", machine: "Máy bế 2", user: "Do Nguyen / R200187", team: "Tổ Gia Công" },
+                    { step: "04", name: "Cắt / Bế theo biên dạng", status: "Chưa tới", machine: "Máy bế 2", user: "Hong Thuy / R2343", team: "Tổ CNC" },
+                    { step: "05", name: "Đóng kiện gỗ & Giao hàng", status: "Chưa tới", machine: "Máy in - 6C", user: "Do Nguyen / R200187", team: "Tổ Kho Vận" }
+                ]
+            }
+        };
+
+        let orderDatabase = JSON.parse(localStorage.getItem('production_order_db')) || defaultOrderDatabase;
+
+        function saveOrderDatabase() {
+            localStorage.setItem('production_order_db', JSON.stringify(orderDatabase));
+        }
+
+        // Lấy danh sách máy có sẵn từ select #machine
+        function getAvailableMachines() {
+            const machineSelect = document.getElementById('machine');
+            const machines = [];
+            Array.from(machineSelect.options).forEach(opt => {
+                if (opt.value) machines.push(opt.value);
+            });
+            return machines;
+        }
+
+        // Lấy danh sách người dùng có sẵn từ form và team
+        function getAvailableUsers() {
+            const users = new Set(["Do Nguyen / R200187", "Hong Thuy / R2343"]);
+            const currentName = document.getElementById('empName').value.trim();
+            const currentId = document.getElementById('empId').value.trim();
+            if (currentName && currentId) {
+                users.add(`${currentName} / ${currentId}`);
+            }
+            return Array.from(users);
+        }
+
+        // Cập nhật quy tắc riêng khi lựa chọn công đoạn / máy
+        function updateMachineRuleDisplay() {
+            const machineSelect = document.getElementById('machine');
+            const selectedVal = machineSelect.value;
+            const titleEl = document.getElementById('machineRuleTitle');
+            const contentEl = document.getElementById('machineRuleContent');
+            const ruleBox = document.getElementById('machineRuleBox');
+
+            const rule = machineRulesDatabase[selectedVal] || "Quy tắc: Vận hành đúng quy trình kiểm soát chất lượng chuẩn ISO xưởng sản xuất.";
+            titleEl.innerText = `Quy tắc vận hành: ${selectedVal}`;
+            contentEl.innerText = rule;
+            ruleBox.classList.remove('hidden');
+        }
+
+        function generateTicketId() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = '';
+            for (let i = 0; i < 10; i++) result += chars.charAt(Math.floor(Math.random() * chars.length));
+            return result;
+        }
+
+        const formatDateForInput = (date) => {
+            const tzOffset = date.getTimezoneOffset() * 60000;
+            return (new Date(date - tzOffset)).toISOString().slice(0, 16);
+        };
+
+        function setDefaultTimes() {
+            const now = new Date();
+            const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+            
+            document.getElementById('endTime').value = formatDateForInput(now);
+            document.getElementById('startTime').value = formatDateForInput(oneHourAgo);
+            
+            updateDurationMinutes(); 
+        }
+
+        function showToast(message, type = 'success') {
+            const toastContainer = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            
+            const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
+            const icon = type === 'success' 
+                ? '<svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>'
+                : '<svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
+
+            toast.className = `toast flex items-center p-4 rounded-xl shadow-xl ${bgColor} text-white`;
+            toast.innerHTML = `<div class="mr-3">${icon}</div><div class="font-medium text-sm">${message}</div>`;
+            
+            toastContainer.appendChild(toast);
+            
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // --- 2. HIỂN THỊ CÔNG ĐOẠN ĐẸP NHƯ CŨ (DẠNG BADGE PILL) ---
+        const orderInput = document.getElementById('orderId');
+        const orderCard = document.getElementById('orderDetailCard');
+
+        function updateOrderDetailView() {
+            const val = orderInput.value.trim();
+            const detail = orderDatabase[val];
+
+            if (detail) {
+                document.getElementById('orderDeadlineBadge').innerText = detail.deadlineStatus;
+                document.getElementById('orderSpecsText').innerText = detail.specs;
+                document.getElementById('orderMaterialText').innerText = detail.materials;
+                document.getElementById('orderDeliveryText').innerText = `${detail.delivery} (Hạn: ${detail.deadline})`;
+                document.getElementById('orderNoteText').innerText = detail.specialNotes;
+
+                renderOrderStepsDisplay(detail.steps);
+                orderCard.classList.remove('hidden');
+            } else {
+                orderCard.classList.add('hidden');
+            }
+        }
+
+        function renderOrderStepsDisplay(steps) {
+            const container = document.getElementById('orderStepsContainer');
+            container.innerHTML = steps.map(s => {
+                let badgeClass = "bg-slate-50 text-slate-600 border-slate-200";
+                if (s.status === "Hoàn tất") badgeClass = "bg-emerald-50 text-emerald-800 border-emerald-200";
+                else if (s.status === "Đang thực hiện") badgeClass = "bg-blue-50 text-blue-800 border-blue-200 ring-1 ring-blue-300 font-bold";
+                else if (s.status === "Chờ máy") badgeClass = "bg-amber-50 text-amber-800 border-amber-200";
+
+                return `
+                    <div class="inline-flex flex-col gap-1 px-3 py-2 rounded-xl border ${badgeClass} text-xs shadow-xs">
+                        <div class="flex items-center gap-1.5">
+                            <span class="font-black text-[10px] bg-white px-1.5 py-0.5 rounded shadow-xs border border-slate-100">CĐ ${s.step}</span>
+                            <span class="font-bold">${s.name}</span>
+                            <span class="text-[10px] font-semibold px-1.5 py-0.2 rounded-full ${s.status === 'Hoàn tất' ? 'bg-emerald-200 text-emerald-900' : (s.status === 'Đang thực hiện' ? 'bg-blue-200 text-blue-900' : 'bg-amber-200 text-amber-900')}">
+                                ${s.status}
+                            </span>
+                        </div>
+                        <div class="text-[10px] opacity-85 flex flex-wrap items-center gap-1.5 mt-0.5">
+                            <span class="font-medium">🖥️ ${s.machine || 'Chưa gán máy'}</span>
+                            <span>•</span>
+                            <span class="font-medium">👤 ${s.user || 'Chưa gán NV'}</span>
+                            ${s.team ? `<span>•</span><span class="font-semibold text-indigo-700">👥 ${s.team}</span>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // --- 3. MODAL CHỈNH SỬA CÔNG ĐOẠN (ĐỌC DỮ LIỆU CÓ SẴN) ---
+        const stepModal = document.getElementById('stepEditModal');
+        let currentEditingOrderKey = "";
+
+        function openStepEditModal() {
+            const orderKey = orderInput.value.trim();
+            if (!orderDatabase[orderKey]) {
+                showToast("Vui lòng chọn đơn hàng hợp lệ để chỉnh sửa công đoạn!", "error");
+                return;
+            }
+            currentEditingOrderKey = orderKey;
+            document.getElementById('stepModalOrderTitle').innerText = `Đơn hàng: ${orderKey}`;
+
+            const detail = orderDatabase[orderKey];
+            const machines = getAvailableMachines();
+            const users = getAvailableUsers();
+            const listContainer = document.getElementById('stepEditListModal');
+
+            listContainer.innerHTML = detail.steps.map((s, idx) => {
+                const machineOptions = machines.map(m => `<option value="${m}" ${s.machine === m ? 'selected' : ''}>${m}</option>`).join('');
+                const userOptions = users.map(u => `<option value="${u}" ${s.user === u ? 'selected' : ''}>${u}</option>`).join('');
+
+                return `
+                    <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2.5">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="font-black text-xs bg-slate-800 text-white px-2 py-0.5 rounded-md">CĐ ${s.step}</span>
+                                <span class="font-bold text-slate-800 text-sm">${s.name}</span>
+                            </div>
+                            <select id="modal_step_status_${idx}" class="text-xs font-bold border border-slate-300 rounded-lg px-2.5 py-1 bg-white outline-none">
+                                <option value="Chưa tới" ${s.status === 'Chưa tới' ? 'selected' : ''}>Chưa tới</option>
+                                <option value="Chờ máy" ${s.status === 'Chờ máy' ? 'selected' : ''}>Chờ máy</option>
+                                <option value="Đang thực hiện" ${s.status === 'Đang thực hiện' ? 'selected' : ''}>Đang thực hiện</option>
+                                <option value="Hoàn tất" ${s.status === 'Hoàn tất' ? 'selected' : ''}>Hoàn tất</option>
+                            </select>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Tên máy có sẵn</label>
+                                <select id="modal_step_machine_${idx}" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1.5 text-xs font-medium text-slate-800 outline-none">
+                                    <option value="">-- Chọn máy --</option>
+                                    ${machineOptions}
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Người dùng có sẵn</label>
+                                <select id="modal_step_user_${idx}" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1.5 text-xs font-medium text-slate-800 outline-none">
+                                    <option value="">-- Chọn nhân viên --</option>
+                                    ${userOptions}
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Team làm việc</label>
+                                <input type="text" id="modal_step_team_${idx}" value="${s.team || ''}" placeholder="VD: Tổ In Ca 1"
+                                    class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1.5 text-xs font-medium text-slate-800 outline-none focus:ring-1 focus:ring-blue-500">
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            stepModal.classList.add('show');
+        }
+
+        function closeStepEditModal() {
+            stepModal.classList.remove('show');
+            currentEditingOrderKey = "";
+        }
+
+        function saveAndApplyStepEdits() {
+            if (!currentEditingOrderKey || !orderDatabase[currentEditingOrderKey]) return;
+
+            const detail = orderDatabase[currentEditingOrderKey];
+            detail.steps.forEach((s, idx) => {
+                const statusEl = document.getElementById(`modal_step_status_${idx}`);
+                const machineEl = document.getElementById(`modal_step_machine_${idx}`);
+                const userEl = document.getElementById(`modal_step_user_${idx}`);
+                const teamEl = document.getElementById(`modal_step_team_${idx}`);
+
+                if (statusEl) s.status = statusEl.value;
+                if (machineEl) s.machine = machineEl.value;
+                if (userEl) s.user = userEl.value;
+                if (teamEl) s.team = teamEl.value.trim();
+            });
+
+            saveOrderDatabase();
+            renderOrderStepsDisplay(detail.steps);
+            closeStepEditModal();
+            showToast("Đã lưu và cập nhật trạng thái công đoạn thành công!");
+        }
+
+        orderInput.addEventListener('input', updateOrderDetailView);
+        orderInput.addEventListener('change', updateOrderDetailView);
+
+        // Lắng nghe thay đổi máy để cập nhật quy tắc riêng
+        document.getElementById('machine').addEventListener('change', updateMachineRuleDisplay);
+
+        // --- 4. LOGIC TÍNH TOÁN GIỜ VÀ PHÚT TRONG FORM ---
+        function updateDurationMinutes() {
+            const startVal = document.getElementById('startTime').value;
+            const endVal = document.getElementById('endTime').value;
+            if (startVal && endVal) {
+                const start = new Date(startVal);
+                const end = new Date(endVal);
+                if (end > start) {
+                    const diffMins = Math.round((end - start) / 60000);
+                    document.getElementById('durationMinutes').value = diffMins;
+                } else {
+                    document.getElementById('durationMinutes').value = '';
+                }
+            }
+        }
+
+        function updateStartTimeFromDuration() {
+            const endVal = document.getElementById('endTime').value;
+            const duration = parseInt(document.getElementById('durationMinutes').value);
+            
+            if (endVal && duration && !isNaN(duration) && duration > 0) {
+                const end = new Date(endVal);
+                const start = new Date(end.getTime() - (duration * 60000));
+                document.getElementById('startTime').value = formatDateForInput(start);
+            }
+        }
+
+        document.getElementById('startTime').addEventListener('change', updateDurationMinutes);
+        document.getElementById('endTime').addEventListener('change', updateDurationMinutes);
+        document.getElementById('durationMinutes').addEventListener('input', updateStartTimeFromDuration);
+
+        // --- 5. ĐỒNG BỘ CHECKLIST TEAM VỚI Ô HỌ TÊN / ID NHÂN VIÊN ---
+        function syncTeamMainUser() {
+            const name = document.getElementById('empName').value.trim() || 'Do Nguyen';
+            const id = document.getElementById('empId').value.trim() || 'R200187';
+            const val = `${name} / ${id}`;
+            const check = document.getElementById('teamMainUserCheck');
+            const label = document.getElementById('teamMainUserLabel');
+            
+            check.value = val;
+            label.innerText = val;
+        }
+
+        document.getElementById('empName').addEventListener('input', syncTeamMainUser);
+        document.getElementById('empId').addEventListener('input', syncTeamMainUser);
+
+        // --- 6. LOGIC TÌM KIẾM VẬT TƯ & ĐẾM ĐÃ CHỌN ---
+        function updateSelectedMaterialBadge() {
+            const count = document.querySelectorAll('.material-check:checked').length;
+            const badge = document.getElementById('selectedCountBadge');
+            if (count > 0) {
+                badge.innerText = `Đã chọn: ${count}`;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        document.querySelectorAll('.material-check').forEach(cb => {
+            cb.addEventListener('change', updateSelectedMaterialBadge);
+        });
+
+        const searchInput = document.getElementById('materialSearchInput');
+        const clearSearchBtn = document.getElementById('clearSearchBtn');
+
+        searchInput.addEventListener('input', (e) => {
+            const keyword = e.target.value.toLowerCase().trim();
+            const items = document.querySelectorAll('.material-item');
+            let visibleCount = 0;
+
+            if (keyword.length > 0) {
+                clearSearchBtn.classList.remove('hidden');
+                clearSearchBtn.classList.add('flex');
+            } else {
+                clearSearchBtn.classList.add('hidden');
+                clearSearchBtn.classList.remove('flex');
+            }
+
+            items.forEach(item => {
+                const text = item.innerText.toLowerCase();
+                if (text.includes(keyword)) {
+                    item.classList.remove('hidden');
+                    item.classList.add('flex');
+                    visibleCount++;
+                } else {
+                    item.classList.add('hidden');
+                    item.classList.remove('flex');
+                }
+            });
+
+            const noFound = document.getElementById('noMaterialFound');
+            if (visibleCount === 0) {
+                noFound.classList.remove('hidden');
+            } else {
+                noFound.classList.add('hidden');
+            }
+        });
+
+        function clearMaterialSearch() {
+            searchInput.value = '';
+            clearSearchBtn.classList.add('hidden');
+            clearSearchBtn.classList.remove('flex');
+            document.querySelectorAll('.material-item').forEach(item => {
+                item.classList.remove('hidden');
+                item.classList.add('flex');
+            });
+            document.getElementById('noMaterialFound').classList.add('hidden');
+            searchInput.focus();
+        }
+
+        // --- 7. LOGIC TÍNH THỜI GIAN REALTIME TỪ LÚC KẾT THÚC ---
+        function getRealtimeFinishedAgo(endTimeStr) {
+            const now = new Date();
+            const end = new Date(endTimeStr);
+            const diffMs = now - end;
+            const diffMinutes = Math.floor(diffMs / 60000);
+
+            if (diffMinutes < 1) {
+                return '<span class="text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-md text-xs font-bold inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>Vừa hoàn thành</span>';
+            }
+
+            let text = '';
+            if (diffMinutes < 60) {
+                text = `Đã xong ${diffMinutes} phút trước`;
+            } else {
+                const hours = Math.floor(diffMinutes / 60);
+                const remainMinutes = diffMinutes % 60;
+                text = remainMinutes > 0 ? `Đã xong ${hours}h ${remainMinutes}p trước` : `Đã xong ${hours} giờ trước`;
+            }
+
+            return `<span class="text-blue-700 bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-md text-xs font-bold inline-flex items-center gap-1.5"><svg class="w-3.5 h-3.5 text-blue-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>${text} (${diffMinutes} phút)</span>`;
+        }
+
+        // --- 8. XỬ LÝ GIAO DIỆN LỊCH SỬ ---
+        function formatTimeHM(dateStr) {
+            const d = new Date(dateStr);
+            return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+        }
+        function formatDateDMY(dateStr) {
+            const d = new Date(dateStr);
+            return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth()+1).toString().padStart(2, '0')}/${d.getFullYear()}`;
+        }
+
+        function renderHistory() {
+            const list = document.getElementById('historyList');
+            list.innerHTML = '';
+            
+            if (reports.length === 0) {
+                list.innerHTML = `<div class="text-center text-gray-400 py-12 bg-gray-50/50 rounded-2xl border-2 border-dashed border-gray-200">Chưa có báo cáo nào.</div>`;
+                return;
+            }
+
+            const reversedReports = [...reports].reverse();
+
+            reversedReports.forEach(report => {
+                
+                // Hiển thị Team làm việc chung
+                const teamHtml = (report.team && report.team.length > 0)
+                    ? `<div class="pt-2"><strong class="text-sm font-bold text-gray-800 block mb-1.5">Team làm việc chung:</strong>
+                       <div class="flex flex-wrap gap-1.5">` + 
+                       report.team.map(t => `<span class="bg-indigo-50 text-indigo-700 border border-indigo-100 px-2.5 py-1 rounded-md text-xs font-semibold">${t}</span>`).join('') +
+                       `</div></div>`
+                    : '';
+
+                // Vật tư sử dụng
+                const materialsHtml = (report.materials && report.materials.length > 0) 
+                    ? report.materials.map(m => {
+                        let parts = m.split('|');
+                        let code = parts[0] ? parts[0].trim() : '';
+                        let supplier = parts[1] ? parts[1].trim() : '';
+                        return `
+                            <div class="flex justify-between items-center py-1.5 border-b border-gray-50 last:border-0">
+                                <span class="text-sm font-bold text-gray-700">${code}</span>
+                                ${supplier ? `<span class="text-[10px] text-blue-600 bg-blue-50 px-2.5 py-1 rounded-md font-semibold tracking-wide"> ${supplier}</span>` : ''}
+                            </div>`;
+                    }).join('')
+                    : `<div class="text-gray-400 text-sm italic py-1">Không có</div>`;
+
+                // Thông số kỹ thuật (Bao gồm tốc độ, nhiệt độ, tram, nhíp, overprint, tay kê)
+                const paramsHtml = (report.parameters && report.parameters.length > 0)
+                    ? `<div class="pt-2"><strong class="text-sm font-bold text-gray-800 block mb-2">Thông số kỹ thuật:</strong>
+                       <div class="flex flex-wrap gap-2">` + 
+                       report.parameters.map(p => {
+                           let colorClass = "text-gray-700 bg-gray-50 border-gray-100";
+                           if (p.includes("Tốc độ")) colorClass = "text-blue-700 bg-blue-50 border-blue-200";
+                           else if (p.includes("Nhiệt độ")) colorClass = "text-orange-600 bg-orange-50 border-orange-200";
+                           else if (p.includes("Tram")) colorClass = "text-emerald-700 bg-emerald-50 border-emerald-200";
+                           else if (p.includes("Nhíp")) colorClass = "text-purple-700 bg-purple-50 border-purple-200";
+                           else if (p.includes("Overprint")) colorClass = p.includes("Giữ") ? "text-cyan-700 bg-cyan-50 border-cyan-200" : "text-rose-700 bg-rose-50 border-rose-200";
+                           else if (p.includes("Tay kê")) colorClass = "text-amber-700 bg-amber-50 border-amber-200";
+                           
+                           return `<span class="${colorClass} px-2.5 py-1 rounded-md text-[11px] font-bold border">${p}</span>`;
+                       }).join('') + `</div></div>`
+                    : '';
+
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-xl shadow-sm border border-gray-100 relative group overflow-hidden transition-all hover:shadow-md hover:border-gray-200";
+                
+                card.innerHTML = `
+                    <!-- Header -->
+                    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-50 bg-white">
+                        <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+                            <span class="bg-blue-600 text-white text-[10px] font-bold px-3 py-1 rounded-full tracking-widest flex items-center gap-1.5 shadow-sm">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path></svg>
+                                ${report.ticketId}
+                            </span>
+                            <span class="text-sm font-bold text-gray-800">
+                                ${report.empName} <span class="text-gray-300 font-normal mx-1">|</span> ${report.empId} <span class="text-gray-300 font-normal mx-1">|</span> <span class="text-gray-900">${report.orderId}</span>
+                            </span>
+                        </div>
+                        <div class="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2 shrink-0">
+                            <button onclick="editReport('${report.ticketId}')" class="text-gray-400 hover:text-blue-600 transition-colors p-1" title="Sửa báo cáo">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                            </button>
+                            <button onclick="openModal('${report.ticketId}')" class="text-gray-400 hover:text-red-500 transition-colors p-1" title="Xóa báo cáo">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Body: 1 Cột tuần tự -->
+                    <div class="p-6 flex flex-col gap-4 bg-white">
+                        
+                        <!-- Máy / Công đoạn -->
+                        <div>
+                            <div class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-0.5">MÁY / CÔNG ĐOẠN</div>
+                            <div class="text-lg font-bold text-blue-700">${report.machine}</div>
+                        </div>
+
+                        <!-- Team làm việc chung -->
+                        ${teamHtml}
+                        
+                        <!-- Sản lượng -->
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-red-600 font-bold uppercase">SẢN LƯỢNG:</span>
+                            <span class="text-lg font-bold text-red-600">${report.quantity} <span class="text-sm">${report.unit}</span></span>
+                        </div>
+                        
+                        <!-- Box Thời Gian (Layout ngang) -->
+                        <div class="bg-gray-50/50 border border-gray-100 rounded-xl p-3 sm:p-4 flex flex-wrap items-center gap-4 sm:gap-6 w-fit">
+                            <div class="flex items-center gap-2 sm:gap-3">
+                                <svg class="w-4 h-4 text-green-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <div class="flex flex-col">
+                                    <span class="text-[9px] text-gray-400 font-bold uppercase tracking-wider">BẮT ĐẦU</span>
+                                    <div class="flex items-baseline gap-1">
+                                        <span class="text-sm font-bold text-gray-800 leading-tight">${formatTimeHM(report.startTime)}</span>
+                                        <span class="text-[10px] text-gray-500">${formatDateDMY(report.startTime)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center gap-2 sm:gap-3">
+                                <svg class="w-4 h-4 text-red-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <div class="flex flex-col">
+                                    <span class="text-[9px] text-gray-400 font-bold uppercase tracking-wider">KẾT THÚC</span>
+                                    <div class="flex items-baseline gap-1">
+                                        <span class="text-sm font-bold text-gray-800 leading-tight">${formatTimeHM(report.endTime)}</span>
+                                        <span class="text-[10px] text-gray-500">${formatDateDMY(report.endTime)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Thanh chia dọc desktop -->
+                            <div class="hidden sm:block w-px h-8 bg-gray-200"></div>
+                            
+                            <!-- Tổng phút máy chạy -->
+                            <div class="flex items-center gap-2 text-blue-700 font-bold w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-200">
+                                <svg class="w-4 h-4 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span class="text-sm">Tổng: <span class="text-lg font-black">${report.durationMinutes || 0}</span> <span class="font-normal text-xs">phút</span></span>
+                            </div>
+                        </div>
+
+                        <!-- Trạng thái chờ công đoạn kế tiếp (Thời gian Realtime từ Giờ kết thúc) -->
+                        <div class="flex items-center gap-2 pt-1">
+                            <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">ĐẾN HIỆN TẠI (REALTIME):</span>
+                            ${getRealtimeFinishedAgo(report.endTime)}
+                        </div>
+
+                        <!-- Vật tư sử dụng -->
+                        <div class="pt-2 border-t border-gray-50">
+                            <strong class="text-sm font-bold text-gray-800 block mb-2">Vật tư sử dụng:</strong>
+                            <div class="flex flex-col">${materialsHtml}</div>
+                            ${report.materialDetails ? `<div class="text-xs text-gray-500 mt-2 flex items-start gap-1.5"><svg class="w-3.5 h-3.5 mt-0.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> ${report.materialDetails}</div>` : ''}
+                        </div>
+                        
+                        <!-- Thông số kỹ thuật -->
+                        ${paramsHtml}
+                    </div>
+
+                    <!-- Note dưới cùng -->
+                    ${report.note ? `<div class="mx-6 mb-6 mt-0 px-4 py-3 bg-gray-50 rounded-lg border border-gray-100 text-sm text-gray-700 flex items-start gap-2"><svg class="w-4 h-4 text-gray-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path></svg> <span>${report.note}</span></div>` : ''}
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        // --- 9. XỬ LÝ SỬA VÀ XÓA ---
+        function editReport(ticketId) {
+            const report = reports.find(r => r.ticketId === ticketId);
+            if (!report) return;
+
+            if (report.empName) {
+                document.getElementById('empName').value = report.empName;
+                document.getElementById('empId').value = report.empId;
+            } else if (report.empId && report.empId.includes('/')) {
+                const parts = report.empId.split('/');
+                document.getElementById('empName').value = parts[0].trim();
+                document.getElementById('empId').value = parts[1].trim();
+            } else {
+                document.getElementById('empName').value = 'Do Nguyen';
+                document.getElementById('empId').value = report.empId || 'R200187';
+            }
+
+            syncTeamMainUser();
+
+            // Khôi phục checklist team
+            document.querySelectorAll('.team-check').forEach(cb => {
+                cb.checked = (report.team && report.team.includes(cb.value));
+            });
+
+            document.getElementById('machine').value = report.machine;
+            updateMachineRuleDisplay();
+
+            document.getElementById('orderId').value = report.orderId;
+            updateOrderDetailView();
+
+            document.getElementById('quantity').value = report.quantity;
+            document.getElementById('unit').value = report.unit;
+            document.getElementById('startTime').value = report.startTime;
+            document.getElementById('endTime').value = report.endTime;
+            
+            updateDurationMinutes(); 
+
+            document.getElementById('note').value = report.note || '';
+            document.getElementById('materialDetails').value = report.materialDetails || '';
+
+            // Checkbox Vật tư
+            clearMaterialSearch();
+            document.querySelectorAll('.material-check').forEach(cb => {
+                cb.checked = (report.materials && report.materials.some(m => m.includes(cb.value) || cb.value.includes(m)));
+            });
+            updateSelectedMaterialBadge();
+
+            document.querySelectorAll('.param-check').forEach(cb => {
+                cb.checked = (report.parameters && report.parameters.includes(cb.value));
+            });
+
+            editingTicketId = ticketId;
+
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.innerText = 'Cập Nhật Dữ Liệu';
+            submitBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+            submitBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+            document.getElementById('cancelEditBtn').classList.remove('hidden');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function cancelEdit() {
+            editingTicketId = null;
+            
+            document.getElementById('reportForm').reset();
+            document.getElementById('empName').value = 'Do Nguyen'; 
+            document.getElementById('empId').value = 'R200187'; 
+            syncTeamMainUser();
+            clearMaterialSearch();
+            updateSelectedMaterialBadge();
+            updateOrderDetailView();
+            updateMachineRuleDisplay();
+            setDefaultTimes();
+
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.innerText = 'Gửi Báo Cáo';
+            submitBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+            submitBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+            document.getElementById('cancelEditBtn').classList.add('hidden');
+        }
+
+        // Modal Logic Xóa
+        const modal = document.getElementById('confirmModal');
+        function openModal(ticketId) {
+            deletingTicketId = ticketId;
+            document.getElementById('deleteTicketCode').innerText = ticketId;
+            modal.classList.add('show');
+        }
+        function closeModal() {
+            deletingTicketId = null;
+            modal.classList.remove('show');
+        }
+        document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
+            if (deletingTicketId) {
+                reports = reports.filter(r => r.ticketId !== deletingTicketId);
+                localStorage.setItem('production_reports', JSON.stringify(reports));
+                renderHistory();
+                showToast(`Đã xóa thành công Mã ticket: ${deletingTicketId}`);
+                closeModal();
+            }
+        });
+
+        // --- 10. KHỞI TẠO VÀ XỬ LÝ SUBMIT ---
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('empName').value = 'Do Nguyen';
+            document.getElementById('empId').value = 'R200187';
+            syncTeamMainUser();
+            setDefaultTimes();
+            updateMachineRuleDisplay();
+            renderHistory();
+            updateSelectedMaterialBadge();
+
+            // Tự động làm mới thời gian Realtime mỗi 60 giây mà không cần F5
+            setInterval(() => {
+                if (!editingTicketId) {
+                    renderHistory();
+                }
+            }, 60000);
+        });
+
+        document.getElementById('reportForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const startTime = new Date(document.getElementById('startTime').value);
+            const endTime = new Date(document.getElementById('endTime').value);
+            const duration = document.getElementById('durationMinutes').value;
+
+            if (endTime <= startTime) {
+                showToast('Giờ kết thúc phải lớn hơn Giờ bắt đầu!', 'error');
+                return;
+            }
+
+            const selectedTeam = Array.from(document.querySelectorAll('.team-check:checked')).map(cb => cb.value);
+            const selectedMaterials = Array.from(document.querySelectorAll('.material-check:checked')).map(cb => cb.value);
+            const selectedParams = Array.from(document.querySelectorAll('.param-check:checked')).map(cb => cb.value);
+
+            const reportData = {
+                empName: document.getElementById('empName').value.trim(),
+                empId: document.getElementById('empId').value.trim(),
+                team: selectedTeam,
+                machine: document.getElementById('machine').value,
+                orderId: document.getElementById('orderId').value.trim(),
+                quantity: document.getElementById('quantity').value,
+                unit: document.getElementById('unit').value,
+                startTime: document.getElementById('startTime').value,
+                endTime: document.getElementById('endTime').value,
+                durationMinutes: duration,
+                note: document.getElementById('note').value.trim(),
+                materials: selectedMaterials,
+                materialDetails: document.getElementById('materialDetails').value.trim(),
+                parameters: selectedParams
+            };
+
+            if (editingTicketId) {
+                const index = reports.findIndex(r => r.ticketId === editingTicketId);
+                if (index !== -1) {
+                    reportData.ticketId = editingTicketId; 
+                    reports[index] = reportData;
+                    showToast('Cập nhật dữ liệu thành công!');
+                }
+                cancelEdit(); 
+            } else {
+                reportData.ticketId = generateTicketId(); 
+                reports.push(reportData);
+                showToast('Báo cáo công đoạn thành công!');
+                
+                document.getElementById('reportForm').reset();
+                document.getElementById('empName').value = reportData.empName;
+                document.getElementById('empId').value = reportData.empId;
+                syncTeamMainUser();
+                clearMaterialSearch();
+                updateSelectedMaterialBadge();
+                updateOrderDetailView();
+                updateMachineRuleDisplay();
+                setDefaultTimes();
+            }
+
+            localStorage.setItem('production_reports', JSON.stringify(reports));
+            renderHistory();
+        });
+    </script>
+</body>
+</html>
